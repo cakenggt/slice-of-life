@@ -1,8 +1,10 @@
 //map of material to color hex value
 var colorMap = {
-  0:'#AFAFFF',
-  1:'#FF0000',
-  2:'#00FF00'
+  0:'#CCFFFF',
+  1:'#FF6600',
+  2:'#00FF00',
+  3:'#993300',
+  4:'#CC00CC'
 };
 //list of tile materials in 3d
 var map = [
@@ -16,10 +18,10 @@ var map = [
   ],
   [
     [
-      1, 2
+      4, 3
     ],
     [
-      1, 2
+      4, 3
     ]
   ]
 ];

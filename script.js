@@ -7,7 +7,7 @@ var position = {
   x: 0.5,
   y: 0,
   z: 0.5,
-  deg: 0
+  deg: 0.02
 };
 
 var canvas;
@@ -33,9 +33,13 @@ $(function(){
   canvasContext = realCanvas.getContext('2d');
 
   setInterval(function(){
+    position.deg = (position.deg + 1.001)%360;
+    $('h1').text(position.deg);
     drawCanvas();
-    position.deg = (position.deg + 1)%360;
   }, 100);
+
+  //position.deg = 91;
+  //drawCanvas();
 });
 
 //point object
@@ -97,10 +101,22 @@ function getColorLine(y){
   var sliceAttributes = getSliceAttributes();
   var xIntercept = sliceAttributes.line.getPointGivenX(0);
   var zIntercept = sliceAttributes.line.getPointGivenZ(0);
-  var leftPoint = xIntercept.z > 0 ? xIntercept : zIntercept;
   var xEnd = sliceAttributes.line.getPointGivenX(xWidth);
   var zEnd = sliceAttributes.line.getPointGivenZ(zWidth);
-  var rightPoint = xEnd.z < zWidth ? xEnd : zEnd;
+  var boundPointList = [xIntercept, zIntercept, xEnd, zEnd];
+  for (var r = boundPointList.length-1; r >= 0; r--){
+    var selectedPoint = boundPointList[r];
+    if (selectedPoint.x > xWidth || selectedPoint.x < 0 ||
+      selectedPoint.z > zWidth || selectedPoint.z < 0){
+      boundPointList.splice(r, 1);
+    }
+  }
+  var leftPoint = boundPointList.sort(function(a, b){
+    return a.x-b.x;
+  })[0];
+  var rightPoint = boundPointList.sort(function(a, b){
+    return b.x-a.x;
+  })[0];
   var startPoint = sliceAttributes.direction == 1 ? leftPoint : rightPoint;
   var endPoint = sliceAttributes.direction == 1 ? rightPoint : leftPoint;
   var mapWidth = endPoint.distance(startPoint);
@@ -132,8 +148,27 @@ function getColorLine(y){
     var rectangle = {};
     //get color to the left of the point, along the line
     rectangle.width = currPoint.distance(prevPoint);
-    var offsetPoint = sliceAttributes.line.getPointGivenX(currPoint.x-0.0000001);
-    rectangle.color = colorMap[map[parseInt(offsetPoint.x)][y][parseInt(offsetPoint.z)]];
+    var offsetPoint;
+    if (Math.abs(sliceAttributes.line.slope) < 0.35) {
+      if (sliceAttributes.line.slope < 0){
+        offsetPoint = sliceAttributes.line.getPointGivenX(currPoint.x-0.00000001);
+      }
+      else {
+        offsetPoint = sliceAttributes.line.getPointGivenX(currPoint.x-0.00000001);
+      }
+    }
+    else {
+      if (sliceAttributes.line.slope < 0){
+        offsetPoint = sliceAttributes.line.getPointGivenZ(currPoint.z+0.00000001);
+      }
+      else{
+        offsetPoint = sliceAttributes.line.getPointGivenZ(currPoint.z-0.00000001);
+      }
+    }
+    console.log(sliceAttributes.line.slope);
+      console.log(offsetPoint.x + ', ' + y + ', ' + offsetPoint.z);
+    rectangle.color = colorMap[map[Math.floor(offsetPoint.x)][y][Math.floor(offsetPoint.z)]];
+    console.log(Math.floor(offsetPoint.x) + ', ' + Math.floor(offsetPoint.z));
     recList.push(rectangle);
   }
   result.recList = recList;
@@ -151,25 +186,27 @@ function drawRectangle(color, x, y, rwidth, rheight){
 function drawCanvas(){
   canvasContext.clearRect(0, 0, width, height);
   var sliceAttributes = getSliceAttributes();
-  var padding = parseInt((width-(getColorLine(0).mapWidth*pixelsPerBlock))/2);
+  var padding = Math.floor((width-(getColorLine(0).mapWidth*pixelsPerBlock))/2);
   for (var y = 0; y < map[0].length; y++){
     //for each y level
-    var yPos = parseInt(height - (y+1)*pixelsPerBlock);
+    var yPos = Math.floor(height - (y+1)*pixelsPerBlock);
     //determine which direction to draw the rectangles with the direction attr
     var colorLine = getColorLine(y);
     var i = sliceAttributes.direction == 1 ? 0 : colorLine.recList.length-1;
+    //var i = 0;
     //add air to the beginning
-    drawRectangle(colorMap[0], 0, yPos, padding, parseInt(pixelsPerBlock));
+    drawRectangle(colorMap[0], 0, yPos, padding, Math.floor(pixelsPerBlock));
     var lastStartPos = padding;
     while (i < colorLine.recList.length && i >= 0){
       var rectangle = colorLine.recList[i];
       var widthInPx = rectangle.width*pixelsPerBlock;
-      drawRectangle(rectangle.color, lastStartPos, yPos, widthInPx, parseInt(pixelsPerBlock));
-      var nextStartPos = parseInt(lastStartPos+widthInPx);
+      drawRectangle(rectangle.color, lastStartPos, yPos, widthInPx, Math.floor(pixelsPerBlock));
+      var nextStartPos = Math.floor(lastStartPos+widthInPx);
       lastStartPos = nextStartPos;
       i = sliceAttributes.direction == 1 ? i+1 : i-1;
+      //i++;
     }
     //add air to the end too
-    drawRectangle(colorMap[0], lastStartPos, yPos, padding, parseInt(pixelsPerBlock));
+    drawRectangle(colorMap[0], lastStartPos, yPos, padding, Math.floor(pixelsPerBlock));
   }
 }

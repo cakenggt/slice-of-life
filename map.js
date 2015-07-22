@@ -1,5 +1,6 @@
 //map of material to color hex value
 var colorMap = {
+  0:'#AFAFFF',
   1:'#FF0000',
   2:'#00FF00'
 };

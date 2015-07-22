@@ -1,3 +1,43 @@
+/*
+player's x, y, z and degrees position on the map.
+y is vertical.
+degrees is their current slice.
+*/
+var position = {
+  x: 0.5,
+  y: 0,
+  z: 0.5,
+  deg: 0
+};
+
+var canvas;
+var width;
+var height;
+var xWidth;
+var zWidth;
+var maxWidth;
+var pixelsPerBlock;
+var realCanvas;
+var canvasContext;
+
+//load all variables
+$(function(){
+  canvas = $('canvas');
+  width = canvas.width();
+  height = canvas.height();
+  xWidth = map.length;
+  zWidth = map[0][0].length;
+  maxWidth = Math.sqrt(Math.pow(xWidth, 2) + Math.pow(zWidth, 2));
+  pixelsPerBlock = width/maxWidth;
+  realCanvas = canvas.get(0);
+  canvasContext = realCanvas.getContext('2d');
+
+  setInterval(function(){
+    drawCanvas();
+    position.deg = (position.deg + 1)%360;
+  }, 100);
+});
+
 //point object
 function point(x, z){
   this.x = x;
@@ -20,18 +60,6 @@ function line(slope, zOffset){
     return new point((z-zOffset)/slope, z);
   };
 }
-
-/*
-player's x, y, z and degrees position on the map.
-y is vertical.
-degrees is their current slice.
-*/
-var position = {
-  x: 0.5,
-  y: 0,
-  z: 0.5,
-  deg: 0
-};
 
 //Returns the degrees in the global position variable in radians
 function getRadians(){
@@ -112,7 +140,36 @@ function getColorLine(y){
   return result;
 }
 
+function drawRectangle(color, x, y, rwidth, rheight){
+  canvasContextstrokeStyle = '#000000';
+  canvasContext.strokeRect(x, y, rwidth, rheight);
+  canvasContext.fillStyle = color;
+  canvasContext.fillRect(x, y, rwidth, rheight);
+  //console.log('draw ' + color + ', ' + x + ', ' + y + ', ' + rwidth + ', ' + rheight);
+}
+
 function drawCanvas(){
-  var canvas = $('canvas');
-  var width = canvas.width();
+  canvasContext.clearRect(0, 0, width, height);
+  var sliceAttributes = getSliceAttributes();
+  var padding = parseInt((width-(getColorLine(0).mapWidth*pixelsPerBlock))/2);
+  for (var y = 0; y < map[0].length; y++){
+    //for each y level
+    var yPos = parseInt(height - (y+1)*pixelsPerBlock);
+    //determine which direction to draw the rectangles with the direction attr
+    var colorLine = getColorLine(y);
+    var i = sliceAttributes.direction == 1 ? 0 : colorLine.recList.length-1;
+    //add air to the beginning
+    drawRectangle(colorMap[0], 0, yPos, padding, parseInt(pixelsPerBlock));
+    var lastStartPos = padding;
+    while (i < colorLine.recList.length && i >= 0){
+      var rectangle = colorLine.recList[i];
+      var widthInPx = rectangle.width*pixelsPerBlock;
+      drawRectangle(rectangle.color, lastStartPos, yPos, widthInPx, parseInt(pixelsPerBlock));
+      var nextStartPos = parseInt(lastStartPos+widthInPx);
+      lastStartPos = nextStartPos;
+      i = sliceAttributes.direction == 1 ? i+1 : i-1;
+    }
+    //add air to the end too
+    drawRectangle(colorMap[0], lastStartPos, yPos, padding, parseInt(pixelsPerBlock));
+  }
 }

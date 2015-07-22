@@ -31,12 +31,32 @@ $(function(){
   pixelsPerBlock = width/maxWidth;
   realCanvas = canvas.get(0);
   canvasContext = realCanvas.getContext('2d');
-
+/*
   setInterval(function(){
     position.deg = (position.deg + 1.001)%360;
     $('h1').text(Math.floor(position.deg));
     drawCanvas();
   }, 100);
+*/
+  drawCanvas();
+  console.log('e rotates clockwise, q counter clockwise');
+  $(document).on('keydown', function(data){
+    console.log(data.keyCode);
+    var key = data.keyCode;
+    if (key == 69){
+      position.deg = (position.deg - 1.001)%360;
+    }
+    else if (key == 81){
+      position.deg = (position.deg + 1.001)%360;
+    }
+    else if (key == 39){
+      //go right
+    }
+    else if (key == 81){
+      //go left
+    }
+    drawCanvas();
+  });
 
   //position.deg = 316;
   //drawCanvas();
@@ -122,6 +142,8 @@ function getColorLine(y){
   var mapWidth = endPoint.distance(startPoint);
   //This is the width of the map, which will sometimes have air on either side
   result.mapWidth = mapWidth;
+  //This is how deep the player is into the map
+  result.playerDeepness = new point(position.x, position.z).distance(startPoint);
   var recList = [];
   var pointList = [];
   var intercept = null;
@@ -183,7 +205,8 @@ function drawRectangle(color, x, y, rwidth, rheight){
 function drawCanvas(){
   canvasContext.clearRect(0, 0, width, height);
   var sliceAttributes = getSliceAttributes();
-  var padding = Math.floor((width-(getColorLine(0).mapWidth*pixelsPerBlock))/2);
+  var indexColorLine = getColorLine(0);
+  var padding = Math.floor((width-(indexColorLine.mapWidth*pixelsPerBlock))/2);
   for (var y = 0; y < map[0].length; y++){
     //for each y level
     var yPos = Math.floor(height - (y+1)*pixelsPerBlock);
@@ -206,4 +229,11 @@ function drawCanvas(){
     //add air to the end too
     drawRectangle(colorMap[0], lastStartPos, yPos, padding, Math.floor(pixelsPerBlock));
   }
+
+  //calculate player's position
+  var spriteWidth = 20;
+  var spriteHeight = 20;
+  var playerX = padding + indexColorLine.playerDeepness*pixelsPerBlock - (spriteWidth/2);
+  var playerY = height - position.y*pixelsPerBlock - spriteHeight;
+  canvasContext.drawImage($('#sprite').get(0), playerX, playerY, spriteWidth, spriteHeight);
 }

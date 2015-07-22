@@ -7,7 +7,7 @@ var position = {
   x: 0.5,
   y: 0,
   z: 0.5,
-  deg: 0.02
+  deg: 0
 };
 
 var canvas;
@@ -34,11 +34,11 @@ $(function(){
 
   setInterval(function(){
     position.deg = (position.deg + 1.001)%360;
-    $('h1').text(position.deg);
+    $('h1').text(Math.floor(position.deg));
     drawCanvas();
   }, 100);
 
-  //position.deg = 91;
+  //position.deg = 316;
   //drawCanvas();
 });
 
@@ -151,24 +151,21 @@ function getColorLine(y){
     var offsetPoint;
     if (Math.abs(sliceAttributes.line.slope) < 0.35) {
       if (sliceAttributes.line.slope < 0){
-        offsetPoint = sliceAttributes.line.getPointGivenX(currPoint.x-0.00000001);
+        offsetPoint = sliceAttributes.line.getPointGivenX(currPoint.x-0.000001);
       }
       else {
-        offsetPoint = sliceAttributes.line.getPointGivenX(currPoint.x-0.00000001);
+        offsetPoint = sliceAttributes.line.getPointGivenX(currPoint.x-0.000001);
       }
     }
     else {
       if (sliceAttributes.line.slope < 0){
-        offsetPoint = sliceAttributes.line.getPointGivenZ(currPoint.z+0.00000001);
+        offsetPoint = sliceAttributes.line.getPointGivenZ(currPoint.z+0.000001);
       }
       else{
-        offsetPoint = sliceAttributes.line.getPointGivenZ(currPoint.z-0.00000001);
+        offsetPoint = sliceAttributes.line.getPointGivenZ(currPoint.z-0.000001);
       }
     }
-    console.log(sliceAttributes.line.slope);
-      console.log(offsetPoint.x + ', ' + y + ', ' + offsetPoint.z);
     rectangle.color = colorMap[map[Math.floor(offsetPoint.x)][y][Math.floor(offsetPoint.z)]];
-    console.log(Math.floor(offsetPoint.x) + ', ' + Math.floor(offsetPoint.z));
     recList.push(rectangle);
   }
   result.recList = recList;

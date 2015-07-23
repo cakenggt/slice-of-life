@@ -7,6 +7,7 @@ var width;
 var height;
 var xWidth;
 var zWidth;
+var yWidth;
 var maxWidth;
 var pixelsPerBlock;
 var realCanvas;
@@ -19,17 +20,32 @@ $(function(){
   height = canvas.height();
   xWidth = map[0].length;
   zWidth = map[0][0].length;
+  yWidth = map.length;
   maxWidth = Math.sqrt(Math.pow(xWidth, 2) + Math.pow(zWidth, 2));
   pixelsPerBlock = width/maxWidth;
   realCanvas = canvas.get(0);
   canvasContext = realCanvas.getContext('2d');
-/*
+
+  //movement engine
   setInterval(function(){
-    position.deg = (position.deg + 1.001)%360;
-    $('h1').text(Math.floor(position.deg));
+    //gravity engine
+    position.vel[1] = position.vel[1] > -0.1 ? position.vel[1] - 0.01 : position.vel[1];
+    var newX = position.x+position.vel[0];
+    var newY = position.y+position.vel[1];
+    var newZ = position.z+position.vel[2];
+    if (canMoveHere(newX, newY, newZ)){
+      position.x = newX;
+      position.y = newY;
+      position.z = newZ;
+    }
+    else{
+      if (position.y%1 !== 0){
+        position.y = Math.floor(position.y);
+      }
+    }
     drawCanvas();
   }, 100);
-*/
+
   drawCanvas();
   $(document).on('keydown', function(data){
     console.log(data.keyCode);
@@ -47,7 +63,7 @@ $(function(){
       //go right
       newX = position.x + 0.01*Math.cos(getRadians());
       newZ = position.z + 0.01*Math.sin(getRadians());
-      if (canMoveHere(newX, newZ)){
+      if (canMoveHere(newX, position.y, newZ)){
         position.x = newX;
         position.z = newZ;
       }
@@ -56,21 +72,26 @@ $(function(){
       //go left
       newX = position.x - 0.01*Math.cos(getRadians());
       newZ = position.z - 0.01*Math.sin(getRadians());
-      if (canMoveHere(newX, newZ)){
+      if (canMoveHere(newX, position.y, newZ)){
         position.x = newX;
         position.z = newZ;
       }
     }
+    else if (key == 38){
+      //jump
+      if (position.y%1 === 0){
+        position.vel[1] = 0.15;
+      }
+    }
     drawCanvas();
   });
-
-  //position.deg = 316;
-  //drawCanvas();
 });
 
-function canMoveHere(x, z){
-  var canMove = x < xWidth && x >= 0 && z < zWidth && z >= 0;
-  canMove = canMove && !tileMap[map[position.y][Math.floor(x)][Math.floor(z)]].solid;
+function canMoveHere(x, y, z){
+  var canMove = x < xWidth && x >= 0 &&
+    z < zWidth && z >= 0 &&
+    y < yWidth && y >= 0;
+  canMove = canMove && !tileMap[map[Math.floor(y)][Math.floor(x)][Math.floor(z)]].solid;
   return canMove;
 }
 

@@ -7,7 +7,8 @@ var position = {
   x: 0.50001,
   y: 0,
   z: 0.50001,
-  deg: 0
+  deg: 0,
+  vel: [0,0,0]
 };
 
 var goal = {
@@ -247,7 +248,8 @@ var map1 = {
     x: 0.50001,
     y: 4,
     z: 0.50001,
-    deg: 0
+    deg: 0,
+    vel: [0, 0, 0]
   },
   goal:{
     x: 4

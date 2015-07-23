@@ -6,19 +6,30 @@ var colorMap = {
   3:'#993300',
   4:'#CC00CC'
 };
-//list of tile materials in 3d
+/*list of tile materials in 3d
+  format is [y][x][z]
+  Like this:
+     z
+  0123456
+  1
+  2
+x 3
+  4
+  5
+  6
+*/
 var map = [
   [
     [
       1, 2
     ],
     [
-      1, 2
+      4, 3
     ]
   ],
   [
     [
-      4, 3
+      1, 2
     ],
     [
       4, 3

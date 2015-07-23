@@ -4,11 +4,15 @@ y is vertical.
 degrees is their current slice.
 */
 var position = {
-  x: 0.5,
+  x: 0.50001,
   y: 0,
-  z: 0.5,
+  z: 0.50001,
   deg: 0
 };
+
+function mod(n, m) {
+  return ((n%m)+m)%m;
+}
 
 var canvas;
 var width;
@@ -25,7 +29,7 @@ $(function(){
   canvas = $('canvas');
   width = canvas.width();
   height = canvas.height();
-  xWidth = map.length;
+  xWidth = map[0].length;
   zWidth = map[0][0].length;
   maxWidth = Math.sqrt(Math.pow(xWidth, 2) + Math.pow(zWidth, 2));
   pixelsPerBlock = width/maxWidth;
@@ -42,18 +46,23 @@ $(function(){
   console.log('e rotates clockwise, q counter clockwise');
   $(document).on('keydown', function(data){
     console.log(data.keyCode);
+    var sliceAttributes = getSliceAttributes();
     var key = data.keyCode;
     if (key == 69){
-      position.deg = (position.deg - 1.001)%360;
+      position.deg = mod(position.deg - 1.001,360);
     }
     else if (key == 81){
-      position.deg = (position.deg + 1.001)%360;
+      position.deg = mod(position.deg + 1.001,360);
     }
     else if (key == 39){
       //go right
+      position.x = position.x + 0.01*Math.cos(getRadians());
+      position.z = position.z + 0.01*Math.sin(getRadians());
     }
-    else if (key == 81){
+    else if (key == 37){
       //go left
+      position.x = position.x - 0.01*Math.cos(getRadians());
+      position.z = position.z - 0.01*Math.sin(getRadians());
     }
     drawCanvas();
   });
@@ -114,8 +123,6 @@ Returns map where mapWidth is the width of the map and
 recList are maps with the rectangle width, and color.
 */
 function getColorLine(y){
-  var xWidth = map.length;
-  var zWidth = map[0][0].length;
   var result = {};
   //Get the start and end points of the line of colored rectangles
   var sliceAttributes = getSliceAttributes();
@@ -187,7 +194,7 @@ function getColorLine(y){
         offsetPoint = sliceAttributes.line.getPointGivenZ(currPoint.z-0.000001);
       }
     }
-    rectangle.color = colorMap[map[Math.floor(offsetPoint.x)][y][Math.floor(offsetPoint.z)]];
+    rectangle.color = colorMap[map[y][Math.floor(offsetPoint.x)][Math.floor(offsetPoint.z)]];
     recList.push(rectangle);
   }
   result.recList = recList;
@@ -207,7 +214,7 @@ function drawCanvas(){
   var sliceAttributes = getSliceAttributes();
   var indexColorLine = getColorLine(0);
   var padding = Math.floor((width-(indexColorLine.mapWidth*pixelsPerBlock))/2);
-  for (var y = 0; y < map[0].length; y++){
+  for (var y = 0; y < map.length; y++){
     //for each y level
     var yPos = Math.floor(height - (y+1)*pixelsPerBlock);
     //determine which direction to draw the rectangles with the direction attr
@@ -231,8 +238,8 @@ function drawCanvas(){
   }
 
   //calculate player's position
-  var spriteWidth = 20;
-  var spriteHeight = 20;
+  var spriteWidth = 30;
+  var spriteHeight = 40;
   var playerX = padding + indexColorLine.playerDeepness*pixelsPerBlock - (spriteWidth/2);
   var playerY = height - position.y*pixelsPerBlock - spriteHeight;
   canvasContext.drawImage($('#sprite').get(0), playerX, playerY, spriteWidth, spriteHeight);

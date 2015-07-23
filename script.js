@@ -12,6 +12,9 @@ var maxWidth;
 var pixelsPerBlock;
 var realCanvas;
 var canvasContext;
+var keyState = {};
+var movementSpeed = 0.15;
+var jumpSpeed = 0.15;
 
 //load all variables
 $(function(){
@@ -49,43 +52,47 @@ $(function(){
     //movement slowdown
     position.vel[0] /= 2;
     position.vel[2] /= 2;
+
+    //key controls
+    var x;
+    var z;
+    if (keyState[69]){
+      position.deg = mod(position.deg - 1.001,360);
+    }
+    else if (keyState[81]){
+      position.deg = mod(position.deg + 1.001,360);
+    }
+    if (keyState[39]){
+      //go right
+      x = position.vel[0] < movementSpeed ? position.vel[0] + 0.01*Math.cos(getRadians()) : movementSpeed;
+      z = position.vel[2] < movementSpeed ? position.vel[2] + 0.01*Math.sin(getRadians()) : movementSpeed;
+      position.vel[0] = x;
+      position.vel[2] = z;
+    }
+    else if (keyState[37]){
+      //go left
+      x = position.vel[0] > -1*movementSpeed ? position.vel[0] - 0.01*Math.cos(getRadians()) : -1*movementSpeed;
+      z = position.vel[2] > -1*movementSpeed ? position.vel[2] - 0.01*Math.sin(getRadians()) : -1*movementSpeed;
+      position.vel[0] = x;
+      position.vel[2] = z;
+    }
+    if (keyState[38]){
+      //jump
+      if (position.y%1 === 0){
+        position.vel[1] = jumpSpeed;
+      }
+    }
+
     drawCanvas();
-  }, 100);
+  }, 20);
 
   drawCanvas();
   $(document).on('keydown', function(data){
+    keyState[data.keyCode || data.which] = true;
     console.log(data.keyCode);
-    var sliceAttributes = getSliceAttributes();
-    var key = data.keyCode;
-    var newX;
-    var newZ;
-    if (key == 69){
-      position.deg = mod(position.deg - 1.001,360);
-    }
-    else if (key == 81){
-      position.deg = mod(position.deg + 1.001,360);
-    }
-    else if (key == 39){
-      //go right
-      newX = position.vel[0] < 0.15 ? position.vel[0] + 0.01*Math.cos(getRadians()) : 0.15;
-      newZ = position.vel[2] < 0.15 ? position.vel[2] + 0.01*Math.sin(getRadians()) : 0.15;
-      position.vel[0] = newX;
-      position.vel[2] = newZ;
-    }
-    else if (key == 37){
-      //go left
-      newX = position.vel[0] > -0.15 ? position.vel[0] - 0.01*Math.cos(getRadians()) : -0.15;
-      newZ = position.vel[2] > -0.15 ? position.vel[2] - 0.01*Math.sin(getRadians()) : -0.15;
-      position.vel[0] = newX;
-      position.vel[2] = newZ;
-    }
-    else if (key == 38){
-      //jump
-      if (position.y%1 === 0){
-        position.vel[1] = 0.15;
-      }
-    }
-    drawCanvas();
+  });
+  $(document).on('keyup', function(data){
+    keyState[data.keyCode || data.which] = false;
   });
 });
 

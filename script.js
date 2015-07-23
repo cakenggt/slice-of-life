@@ -69,7 +69,9 @@ $(function(){
 });
 
 function canMoveHere(x, z){
-  return !tileMap[map[position.y][Math.floor(x)][Math.floor(z)]].solid;
+  var canMove = x < xWidth && x >= 0 && z < zWidth && z >= 0;
+  canMove = canMove && !tileMap[map[position.y][Math.floor(x)][Math.floor(z)]].solid;
+  return canMove;
 }
 
 //point object
@@ -202,23 +204,25 @@ function getColorLine(y){
   return result;
 }
 
-function drawRectangle(color, x, y, rwidth, rheight){
-  canvasContextstrokeStyle = '#000000';
-  canvasContext.strokeRect(x, y, rwidth, rheight);
+function drawRectangle(color, x, y, rwidth, rheight, border){
+  if (border){
+    canvasContextstrokeStyle = '#000000';
+    canvasContext.strokeRect(x, y, rwidth, rheight);
+  }
   canvasContext.fillStyle = color;
   canvasContext.fillRect(x, y, rwidth, rheight);
   //console.log('draw ' + color + ', ' + x + ', ' + y + ', ' + rwidth + ', ' + rheight);
 }
 
 function drawCanvas(){
-  $('h1').text(Math.floor(position.deg));
+  $('h1').html(Math.floor(position.deg)+'&deg');
   canvasContext.clearRect(0, 0, width, height);
   var sliceAttributes = getSliceAttributes();
   var indexColorLine = getColorLine(0);
   var padding = Math.floor((width-(indexColorLine.mapWidth*pixelsPerBlock))/2);
+  //for each y level
+  var yPos = height-Math.floor(pixelsPerBlock);
   for (var y = 0; y < map.length; y++){
-    //for each y level
-    var yPos = Math.floor(height - (y+1)*pixelsPerBlock);
     //determine which direction to draw the rectangles with the direction attr
     var colorLine = getColorLine(y);
     var i = sliceAttributes.direction == 1 ? 0 : colorLine.recList.length-1;
@@ -229,7 +233,7 @@ function drawCanvas(){
     while (i < colorLine.recList.length && i >= 0){
       var rectangle = colorLine.recList[i];
       var widthInPx = rectangle.width*pixelsPerBlock;
-      drawRectangle(rectangle.color, lastStartPos, yPos, widthInPx, Math.floor(pixelsPerBlock));
+      drawRectangle(rectangle.color, lastStartPos, yPos, widthInPx, Math.floor(pixelsPerBlock), false);
       var nextStartPos = Math.floor(lastStartPos+widthInPx);
       lastStartPos = nextStartPos;
       i = sliceAttributes.direction == 1 ? i+1 : i-1;
@@ -237,6 +241,7 @@ function drawCanvas(){
     }
     //add air to the end too
     drawRectangle(tileMap[0].color, lastStartPos, yPos, padding, Math.floor(pixelsPerBlock));
+    yPos -= Math.floor(pixelsPerBlock);
   }
 
   //calculate player's position

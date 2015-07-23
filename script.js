@@ -30,19 +30,25 @@ $(function(){
   setInterval(function(){
     //gravity engine
     position.vel[1] = position.vel[1] > -0.1 ? position.vel[1] - 0.01 : position.vel[1];
-    var newX = position.x+position.vel[0];
     var newY = position.y+position.vel[1];
-    var newZ = position.z+position.vel[2];
-    if (canMoveHere(newX, newY, newZ)){
-      position.x = newX;
+    if (canMoveHere(position.x, newY, position.z)){
       position.y = newY;
-      position.z = newZ;
     }
     else{
       if (position.y%1 !== 0){
         position.y = Math.floor(position.y);
       }
     }
+    //movement
+    var newX = position.x+position.vel[0];
+    var newZ = position.z+position.vel[2];
+    if (canMoveHere(newX, position.y, newZ)){
+      position.x = newX;
+      position.z = newZ;
+    }
+    //movement slowdown
+    position.vel[0] /= 2;
+    position.vel[2] /= 2;
     drawCanvas();
   }, 100);
 
@@ -61,21 +67,19 @@ $(function(){
     }
     else if (key == 39){
       //go right
-      newX = position.x + 0.01*Math.cos(getRadians());
-      newZ = position.z + 0.01*Math.sin(getRadians());
-      if (canMoveHere(newX, position.y, newZ)){
-        position.x = newX;
-        position.z = newZ;
-      }
+      newX = position.vel[0] < 0.15 ? position.vel[0] + 0.01*Math.cos(getRadians()) : 0.15;
+      newZ = position.vel[2] < 0.15 ? position.vel[2] + 0.01*Math.sin(getRadians()) : 0.15;
+      position.vel[0] = newX;
+      position.vel[2] = newZ;
     }
     else if (key == 37){
       //go left
-      newX = position.x - 0.01*Math.cos(getRadians());
-      newZ = position.z - 0.01*Math.sin(getRadians());
-      if (canMoveHere(newX, position.y, newZ)){
-        position.x = newX;
-        position.z = newZ;
-      }
+      newX = position.vel[0] > -0.15 ? position.vel[0] - 0.01*Math.cos(getRadians()) : -0.15;
+      newZ = position.vel[2] > -0.15 ? position.vel[2] - 0.01*Math.sin(getRadians()) : -0.15;
+      console.log(newX);
+      console.log(newZ);
+      position.vel[0] = newX;
+      position.vel[2] = newZ;
     }
     else if (key == 38){
       //jump

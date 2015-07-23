@@ -31,11 +31,12 @@ $(function(){
   }, 100);
 */
   drawCanvas();
-  console.log('e rotates clockwise, q counter clockwise');
   $(document).on('keydown', function(data){
     console.log(data.keyCode);
     var sliceAttributes = getSliceAttributes();
     var key = data.keyCode;
+    var newX;
+    var newZ;
     if (key == 69){
       position.deg = mod(position.deg - 1.001,360);
     }
@@ -44,13 +45,21 @@ $(function(){
     }
     else if (key == 39){
       //go right
-      position.x = position.x + 0.01*Math.cos(getRadians());
-      position.z = position.z + 0.01*Math.sin(getRadians());
+      newX = position.x + 0.01*Math.cos(getRadians());
+      newZ = position.z + 0.01*Math.sin(getRadians());
+      if (canMoveHere(newX, newZ)){
+        position.x = newX;
+        position.z = newZ;
+      }
     }
     else if (key == 37){
       //go left
-      position.x = position.x - 0.01*Math.cos(getRadians());
-      position.z = position.z - 0.01*Math.sin(getRadians());
+      newX = position.x - 0.01*Math.cos(getRadians());
+      newZ = position.z - 0.01*Math.sin(getRadians());
+      if (canMoveHere(newX, newZ)){
+        position.x = newX;
+        position.z = newZ;
+      }
     }
     drawCanvas();
   });
@@ -58,6 +67,10 @@ $(function(){
   //position.deg = 316;
   //drawCanvas();
 });
+
+function canMoveHere(x, z){
+  return !tileMap[map[position.y][Math.floor(x)][Math.floor(z)]].solid;
+}
 
 //point object
 function point(x, z){
@@ -198,6 +211,7 @@ function drawRectangle(color, x, y, rwidth, rheight){
 }
 
 function drawCanvas(){
+  $('h1').text(Math.floor(position.deg));
   canvasContext.clearRect(0, 0, width, height);
   var sliceAttributes = getSliceAttributes();
   var indexColorLine = getColorLine(0);

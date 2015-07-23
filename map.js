@@ -136,6 +136,64 @@ var metaTileMap = {
         3, 1, 3, 1
       ]
     ]
+  ],
+  wall1:[
+    [
+      [
+        0, 0, 0, 0
+      ],
+      [
+        0, 0, 0, 0
+      ],
+      [
+        0, 0, 0, 0
+      ],
+      [
+        4, 4, 4, 4
+      ]
+    ],
+    [
+      [
+        0, 0, 0, 0
+      ],
+      [
+        0, 0, 0, 0
+      ],
+      [
+        0, 0, 0, 0
+      ],
+      [
+        4, 4, 4, 4
+      ]
+    ],
+    [
+      [
+        0, 0, 0, 0
+      ],
+      [
+        0, 0, 0, 0
+      ],
+      [
+        0, 0, 0, 0
+      ],
+      [
+        4, 4, 4, 4
+      ]
+    ],
+    [
+      [
+        0, 0, 0, 0
+      ],
+      [
+        0, 0, 0, 0
+      ],
+      [
+        0, 0, 0, 0
+      ],
+      [
+        4, 4, 4, 4
+      ]
+    ]
   ]
 };
 
@@ -156,6 +214,8 @@ x 3
   4
   5
   6
+
+  y increases the further you go down the map. The ground is the first slice
 */
 var map = [
   [
@@ -194,7 +254,7 @@ var map1 = {
     ],
     [
       [
-        metaTileMap.air1, metaTileMap.air1
+        metaTileMap.wall1, metaTileMap.air1
       ],
       [
         metaTileMap.air1, metaTileMap.air1

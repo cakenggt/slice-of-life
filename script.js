@@ -76,8 +76,6 @@ $(function(){
       //go left
       newX = position.vel[0] > -0.15 ? position.vel[0] - 0.01*Math.cos(getRadians()) : -0.15;
       newZ = position.vel[2] > -0.15 ? position.vel[2] - 0.01*Math.sin(getRadians()) : -0.15;
-      console.log(newX);
-      console.log(newZ);
       position.vel[0] = newX;
       position.vel[2] = newZ;
     }
@@ -236,7 +234,6 @@ function drawRectangle(color, x, y, rwidth, rheight, border){
   }
   canvasContext.fillStyle = color;
   canvasContext.fillRect(x, y, rwidth, rheight);
-  //console.log('draw ' + color + ', ' + x + ', ' + y + ', ' + rwidth + ', ' + rheight);
 }
 
 function drawCanvas(){

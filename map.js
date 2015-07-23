@@ -23,7 +23,8 @@ var tileMap = {
   1:new tile('#FF6600', true),
   2:new tile('#00FF00', true),
   3:new tile('#993300', true),
-  4:new tile('#CC00CC', true)
+  4:new tile('#CC00CC', true),
+  5:new tile('#FFD700', false)
 };
 
 //map of meta tiles, collections of tiles
@@ -201,6 +202,64 @@ var metaTileMap = {
         4, 4, 4, 4
       ]
     ]
+  ],
+  goal1:[
+    [
+      [
+        0, 0, 0, 0
+      ],
+      [
+        5, 0, 0, 0
+      ],
+      [
+        0, 0, 0, 0
+      ],
+      [
+        0, 0, 0, 0
+      ]
+    ],
+    [
+      [
+        0, 0, 0, 0
+      ],
+      [
+        0, 0, 0, 0
+      ],
+      [
+        0, 0, 0, 0
+      ],
+      [
+        0, 0, 0, 0
+      ]
+    ],
+    [
+      [
+        0, 0, 0, 0
+      ],
+      [
+        0, 0, 0, 0
+      ],
+      [
+        0, 0, 0, 0
+      ],
+      [
+        0, 0, 0, 0
+      ]
+    ],
+    [
+      [
+        0, 0, 0, 0
+      ],
+      [
+        0, 0, 0, 0
+      ],
+      [
+        0, 0, 0, 0
+      ],
+      [
+        0, 0, 0, 0
+      ]
+    ]
   ]
 };
 
@@ -252,7 +311,9 @@ var map1 = {
     vel: [0, 0, 0]
   },
   goal:{
-    x: 4
+    x: 5,
+    y: 4,
+    z: 0
   },
   tiles:[
     [
@@ -268,7 +329,7 @@ var map1 = {
         metaTileMap.wall1, metaTileMap.air1
       ],
       [
-        metaTileMap.air1, metaTileMap.air1
+        metaTileMap.goal1, metaTileMap.air1
       ]
     ]
   ]

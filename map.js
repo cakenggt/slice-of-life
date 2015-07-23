@@ -10,6 +10,12 @@ var position = {
   deg: 0
 };
 
+var goal = {
+  x:0,
+  y:0,
+  z:0
+};
+
 //map of material to color hex value
 var tileMap = {
   0:new tile('#CCFFFF', false),
@@ -243,6 +249,9 @@ var map1 = {
     z: 0.50001,
     deg: 0
   },
+  goal:{
+    x: 4
+  },
   tiles:[
     [
       [
@@ -296,6 +305,7 @@ function mapGenerator(preMap){
   }
   position = preMap.playerPos;
   map = compiledMap;
+  goal = preMap.goal;
 }
 
 mapGenerator(map1);

@@ -215,7 +215,11 @@ function drawRectangle(color, x, y, rwidth, rheight, border){
 }
 
 function drawCanvas(){
-  $('h1').html(Math.floor(position.deg)+'&deg');
+  var winText = (goal.x === undefined || Math.floor(position.x) == goal.x) &&
+    (goal.y === undefined || Math.floor(position.y) == goal.y) &&
+    (goal.z === undefined || Math.floor(position.z) == goal.z) ?
+    ' You Won!!!' : '';
+  $('h1').html(Math.floor(position.deg)+'&deg' + winText);
   canvasContext.clearRect(0, 0, width, height);
   var sliceAttributes = getSliceAttributes();
   var indexColorLine = getColorLine(0);

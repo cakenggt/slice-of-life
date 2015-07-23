@@ -1,15 +1,3 @@
-/*
-player's x, y, z and degrees position on the map.
-y is vertical.
-degrees is their current slice.
-*/
-var position = {
-  x: 0.50001,
-  y: 0,
-  z: 0.50001,
-  deg: 0
-};
-
 function mod(n, m) {
   return ((n%m)+m)%m;
 }
@@ -194,7 +182,7 @@ function getColorLine(y){
         offsetPoint = sliceAttributes.line.getPointGivenZ(currPoint.z-0.000001);
       }
     }
-    rectangle.color = colorMap[map[y][Math.floor(offsetPoint.x)][Math.floor(offsetPoint.z)]];
+    rectangle.color = tileMap[map[y][Math.floor(offsetPoint.x)][Math.floor(offsetPoint.z)]].color;
     recList.push(rectangle);
   }
   result.recList = recList;
@@ -222,7 +210,7 @@ function drawCanvas(){
     var i = sliceAttributes.direction == 1 ? 0 : colorLine.recList.length-1;
     //var i = 0;
     //add air to the beginning
-    drawRectangle(colorMap[0], 0, yPos, padding, Math.floor(pixelsPerBlock));
+    drawRectangle(tileMap[0].color, 0, yPos, padding, Math.floor(pixelsPerBlock));
     var lastStartPos = padding;
     while (i < colorLine.recList.length && i >= 0){
       var rectangle = colorLine.recList[i];
@@ -234,7 +222,7 @@ function drawCanvas(){
       //i++;
     }
     //add air to the end too
-    drawRectangle(colorMap[0], lastStartPos, yPos, padding, Math.floor(pixelsPerBlock));
+    drawRectangle(tileMap[0].color, lastStartPos, yPos, padding, Math.floor(pixelsPerBlock));
   }
 
   //calculate player's position

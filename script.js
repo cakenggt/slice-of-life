@@ -15,6 +15,8 @@ var canvasContext;
 var keyState = {};
 var movementSpeed = 0.15;
 var jumpSpeed = 0.15;
+var spriteWidth = 30;
+var spriteHeight = 40;
 
 //load all variables
 $(function(){
@@ -45,7 +47,8 @@ $(function(){
     //movement
     var newX = position.x+position.vel[0];
     var newZ = position.z+position.vel[2];
-    if (canMoveHere(newX, position.y, newZ)){
+    //Check to make sure that the player isn't jumping their head through anything
+    if (canMoveHere(newX, position.y+(spriteHeight/pixelsPerBlock), newZ)){
       position.x = newX;
       position.z = newZ;
     }
@@ -278,8 +281,6 @@ function drawCanvas(){
   }
 
   //calculate player's position
-  var spriteWidth = 30;
-  var spriteHeight = 40;
   var playerX = padding + indexColorLine.playerDeepness*pixelsPerBlock - (spriteWidth/2);
   var playerY = height - position.y*pixelsPerBlock - spriteHeight;
   canvasContext.drawImage($('#sprite').get(0), playerX, playerY, spriteWidth, spriteHeight);

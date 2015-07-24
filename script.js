@@ -13,10 +13,13 @@ var pixelsPerBlock;
 var realCanvas;
 var canvasContext;
 var keyState = {};
-var movementSpeed = 0.15;
-var jumpSpeed = 0.15;
+var movementSpeed;
 var spriteWidth = 30;
 var spriteHeight = 40;
+var interval = 20;
+var jumpSpeed = 3/interval;
+var acceleration = 0.2/interval;
+var gravity = 0.2/interval;
 
 //load all variables
 $(function(){
@@ -30,12 +33,13 @@ $(function(){
   pixelsPerBlock = width/maxWidth;
   realCanvas = canvas.get(0);
   canvasContext = realCanvas.getContext('2d');
+  movementSpeed = (maxWidth/10)/interval;
 
   //movement engine
   setInterval(function(){
     //gravity engine
-    position.vel[1] = position.vel[1] > -0.1 ? position.vel[1] - 0.01 : position.vel[1];
-    var newY = position.y+position.vel[1];
+    position.vel.y = position.vel.y > -0.1 ? position.vel.y - gravity : position.vel.y;
+    var newY = position.y+position.vel.y;
     if (canMoveHere(position.x, newY, position.z)){
       position.y = newY;
     }
@@ -45,16 +49,13 @@ $(function(){
       }
     }
     //movement
-    var newX = position.x+position.vel[0];
-    var newZ = position.z+position.vel[2];
+    var newX = position.x+position.vel.x;
+    var newZ = position.z+position.vel.z;
     //Check to make sure that the player isn't jumping their head through anything
     if (canMoveHere(newX, position.y+(spriteHeight/pixelsPerBlock), newZ)){
       position.x = newX;
       position.z = newZ;
     }
-    //movement slowdown
-    position.vel[0] /= 2;
-    position.vel[2] /= 2;
 
     //key controls
     var x;
@@ -65,29 +66,39 @@ $(function(){
     else if (keyState[81]){
       position.deg = mod(position.deg + 1.001,360);
     }
-    if (keyState[39]){
+    if (keyState[39] || keyState[68]){
       //go right
-      x = position.vel[0] < movementSpeed ? position.vel[0] + 0.01*Math.cos(getRadians()) : movementSpeed;
-      z = position.vel[2] < movementSpeed ? position.vel[2] + 0.01*Math.sin(getRadians()) : movementSpeed;
-      position.vel[0] = x;
-      position.vel[2] = z;
+      x = position.vel.length() < movementSpeed ? position.vel.x + acceleration*Math.cos(getRadians()) : movementSpeed*Math.cos(getRadians());
+      z = position.vel.length() < movementSpeed ? position.vel.z + acceleration*Math.sin(getRadians()) : movementSpeed*Math.sin(getRadians());
+      position.vel.x = x;
+      position.vel.z = z;
     }
-    else if (keyState[37]){
+    else if (keyState[37] || keyState[65]){
       //go left
-      x = position.vel[0] > -1*movementSpeed ? position.vel[0] - 0.01*Math.cos(getRadians()) : -1*movementSpeed;
-      z = position.vel[2] > -1*movementSpeed ? position.vel[2] - 0.01*Math.sin(getRadians()) : -1*movementSpeed;
-      position.vel[0] = x;
-      position.vel[2] = z;
+      x = position.vel.length() < movementSpeed ? position.vel.x - acceleration*Math.cos(getRadians()) : -movementSpeed*Math.cos(getRadians());
+      z = position.vel.length() < movementSpeed ? position.vel.z - acceleration*Math.sin(getRadians()) : -movementSpeed*Math.sin(getRadians());
+      position.vel.x = x;
+      position.vel.z = z;
     }
-    if (keyState[38]){
+    else{
+      //movement slowdown
+      position.vel.x *= 1/2;
+      position.vel.z *= 1/2;
+    }
+    if (keyState[38]  || keyState[87]){
       //jump
       if (position.y%1 === 0){
-        position.vel[1] = jumpSpeed;
+        position.vel.y = jumpSpeed;
+      }
+    }
+    else{
+      if (position.vel.y > 0){
+        position.vel.y *= 1/2;
       }
     }
 
     drawCanvas();
-  }, 20);
+  }, interval);
 
   drawCanvas();
   $(document).on('keydown', function(data){
@@ -247,9 +258,7 @@ function drawRectangle(color, x, y, rwidth, rheight, border){
 }
 
 function drawCanvas(){
-  var winText = (goal.x === undefined || Math.floor(position.x) == goal.x) &&
-    (goal.y === undefined || Math.floor(position.y) == goal.y) &&
-    (goal.z === undefined || Math.floor(position.z) == goal.z) ?
+  var winText = tileMap[map[Math.floor(position.y)][Math.floor(position.x)][Math.floor(position.z)]].goal ?
     ' You Won!!!' : '';
   $('h1').html(Math.floor(position.deg)+'&deg' + winText);
   canvasContext.clearRect(0, 0, width, height);

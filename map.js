@@ -1,3 +1,18 @@
+//vector object
+function vector(x, y, z){
+  this.x = x;
+  this.y = y;
+  this.z = z;
+  this.multiply = function(mult){
+    this.x *= mult;
+    this.y *= mult;
+    this.z *= mult;
+  };
+  this.length = function(){
+    return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
+  };
+}
+
 /*
 player's x, y, z and degrees position on the map.
 y is vertical.
@@ -8,23 +23,19 @@ var position = {
   y: 0,
   z: 0.50001,
   deg: 0,
-  vel: [0,0,0]
-};
-
-var goal = {
-  x:0,
-  y:0,
-  z:0
+  vel: new vector(0, 0, 0)
 };
 
 //map of material to color hex value
 var tileMap = {
-  0:new tile('#CCFFFF', false),
-  1:new tile('#FF6600', true),
-  2:new tile('#00FF00', true),
-  3:new tile('#993300', true),
-  4:new tile('#CC00CC', true),
-  5:new tile('#FFD700', false)
+  //air block
+  0:new tile('#CCFFFF', false, false),
+  1:new tile('#FF6600', true, false),
+  2:new tile('#00FF00', true, false),
+  3:new tile('#993300', true, false),
+  4:new tile('#CC00CC', true, false),
+  //goal block
+  5:new tile('#FFD700', false, true)
 };
 
 //map of meta tiles, collections of tiles
@@ -264,9 +275,10 @@ var metaTileMap = {
 };
 
 //tile object
-function tile(color, solid){
+function tile(color, solid, goal){
   this.color = color;
   this.solid = solid;
+  this.goal = goal;
 }
 
 /*list of tile materials in 3d
@@ -308,12 +320,7 @@ var map1 = {
     y: 4,
     z: 0.50001,
     deg: 0,
-    vel: [0, 0, 0]
-  },
-  goal:{
-    x: 5,
-    y: 4,
-    z: 0
+    vel: new vector(0, 0, 0)
   },
   tiles:[
     [
@@ -368,7 +375,6 @@ function mapGenerator(preMap){
   }
   position = preMap.playerPos;
   map = compiledMap;
-  goal = preMap.goal;
 }
 
 mapGenerator(map1);

@@ -17,7 +17,7 @@ var movementSpeed;
 var spriteWidth = 30;
 var spriteHeight = 40;
 var interval = 20;
-var jumpSpeed = 3/interval;
+var jumpSpeed = 4/interval;
 var acceleration = 0.2/interval;
 var gravity = 0.2/interval;
 var mapMap = {
@@ -66,7 +66,8 @@ $(function(){
     var newX = position.x+position.vel.x;
     var newZ = position.z+position.vel.z;
     //Check to make sure that the player isn't jumping their head through anything
-    if (canMoveHere(newX, position.y+(spriteHeight/pixelsPerBlock), newZ)){
+    if (canMoveHere(newX, position.y+(spriteHeight/pixelsPerBlock), newZ) &&
+      canMoveHere(newX, position.y, newZ)){
       position.x = newX;
       position.z = newZ;
     }

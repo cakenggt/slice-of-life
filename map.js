@@ -274,11 +274,72 @@ var metaTileMap = {
   ]
 };
 
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+
+function rgbToHex(r, g, b) {
+    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
 //tile object
 function tile(color, solid, goal){
   this.color = color;
   this.solid = solid;
   this.goal = goal;
+}
+
+/*
+converts Troxel voxel to tile
+t is used for solid
+s is used for goal
+*/
+function convertTroxelToTile(trox){
+  //return air if empty
+  if (!trox){
+    return tileMap[0];
+  }
+  else{
+    return new tile(rgbToHex(trox.r, trox.g, trox.b), trox.t, trox.s);
+  }
+}
+
+/*
+Converts a troxel json export inside of a map to the map format and returns it.
+Also mutates the object.
+*/
+function convertTroxelMap(troxelMap){
+  var troxel = troxelMap.troxel;
+  var result = [];
+  var voxels = troxel.voxels;
+  for (var y = 0; y < troxel.y; y++){
+    result[y] = [];
+    for (var x = 0; x < troxel.x; x++){
+      result[y][x] = [];
+      for (var z = 0; z < troxel.z; z++){
+        //If the troxel doesn't exist, then fill with air
+        if (voxels[x]){
+          if (voxels[x][y]){
+            if (voxels[x][y][z]){
+              result[y][x][z] = convertTroxelToTile(voxels[x][y][z]);
+            }
+            else{
+              result[y][x][z] = tileMap[0];
+            }
+          }
+          else{
+            result[y][x][z] = tileMap[0];
+          }
+        }
+        else{
+          result[y][x][z] = tileMap[0];
+        }
+      }
+    }
+  }
+  troxelMap.tiles = result;
+  return troxelMap;
 }
 
 /*list of tile materials in 3d
@@ -295,24 +356,7 @@ x 3
 
   y increases the further you go down the map. The ground is the first slice
 */
-var map = [
-  [
-    [
-      1, 2
-    ],
-    [
-      4, 3
-    ]
-  ],
-  [
-    [
-      1, 2
-    ],
-    [
-      4, 3
-    ]
-  ]
-];
+var map;
 
 var map1 = {
   playerPos:{
@@ -346,13 +390,11 @@ var map1 = {
 function mapGenerator(preMap){
   var metaTileSize = preMap.tiles[0][0][0].length;
   var compiledMap = [];
-  //console.log(compiledMap);
   var metaTiles = preMap.tiles;
   for (var my = 0; my < metaTiles.length; my++){
     for (var mx = 0; mx < metaTiles[my].length; mx++){
       for (var mz = 0; mz < metaTiles[my][mx].length; mz++){
         var metaTile = metaTiles[my][mx][mz];
-        //console.log(compiledMap);
         for (var y = 0; y < metaTile.length; y++){
           var compiledY = (metaTileSize*my)+y;
           if (compiledMap[compiledY] === undefined){
@@ -377,4 +419,9 @@ function mapGenerator(preMap){
   map = compiledMap;
 }
 
-mapGenerator(map1);
+//mapGenerator(map1);
+function setGameVarForMap(givenMap){
+  givenMap = convertTroxelMap(givenMap);
+  position = givenMap.playerPos;
+  map = givenMap.tiles;
+}

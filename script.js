@@ -114,7 +114,7 @@ function canMoveHere(x, y, z){
   var canMove = x < xWidth && x >= 0 &&
     z < zWidth && z >= 0 &&
     y < yWidth && y >= 0;
-  canMove = canMove && !tileMap[map[Math.floor(y)][Math.floor(x)][Math.floor(z)]].solid;
+  canMove = canMove && !map[Math.floor(y)][Math.floor(x)][Math.floor(z)].solid;
   return canMove;
 }
 
@@ -241,7 +241,7 @@ function getColorLine(y){
         offsetPoint = sliceAttributes.line.getPointGivenZ(currPoint.z-0.000001);
       }
     }
-    rectangle.color = tileMap[map[y][Math.floor(offsetPoint.x)][Math.floor(offsetPoint.z)]].color;
+    rectangle.color = map[y][Math.floor(offsetPoint.x)][Math.floor(offsetPoint.z)].color;
     recList.push(rectangle);
   }
   result.recList = recList;
@@ -258,7 +258,7 @@ function drawRectangle(color, x, y, rwidth, rheight, border){
 }
 
 function drawCanvas(){
-  var winText = tileMap[map[Math.floor(position.y)][Math.floor(position.x)][Math.floor(position.z)]].goal ?
+  var winText = map[Math.floor(position.y)][Math.floor(position.x)][Math.floor(position.z)].goal ?
     ' You Won!!!' : '';
   $('h1').html(Math.floor(position.deg)+'&deg' + winText);
   canvasContext.clearRect(0, 0, width, height);

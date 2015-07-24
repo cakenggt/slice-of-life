@@ -38,7 +38,6 @@ function loadNextMap(){
 
 function loadMap(mapName){
   $('#next').hide();
-  won = false;
   var url = mapMap[mapName].url;
   $.getScript(url, loadAttributes);
 }
@@ -54,6 +53,7 @@ function loadAttributes(){
   //blocks multiplied by pixels to get pixels
   spriteWidth = 0.9*pixelsPerBlock;
   spriteHeight = (spriteWidth/realSprite.width)*realSprite.height;
+  won = false;
 }
 
 //load all variables

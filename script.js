@@ -14,9 +14,13 @@ var realCanvas;
 var canvasContext;
 var keyState = {};
 var movementSpeed;
-var spriteWidth = 30;
-var spriteHeight = 40;
+var realSprite;
+//in px
+var spriteWidth;
+var spriteHeight;
+//one divided by this number
 var interval = 20;
+//in blocks
 var jumpSpeed = 4/interval;
 var acceleration = 0.2/interval;
 var gravity = 0.2/interval;
@@ -37,6 +41,10 @@ function loadAttributes(){
   maxWidth = Math.sqrt(Math.pow(xWidth, 2) + Math.pow(zWidth, 2));
   pixelsPerBlock = width/maxWidth;
   movementSpeed = (maxWidth/10)/interval;
+  realSprite = $('#sprite').get(0);
+  //blocks multiplied by pixels to get pixels
+  spriteWidth = 0.9*pixelsPerBlock;
+  spriteHeight = (spriteWidth/realSprite.width)*realSprite.height;
 }
 
 //load all variables
@@ -307,5 +315,5 @@ function drawCanvas(){
   //calculate player's position
   var playerX = padding + indexColorLine.playerDeepness*pixelsPerBlock - (spriteWidth/2);
   var playerY = height - position.y*pixelsPerBlock - spriteHeight;
-  canvasContext.drawImage($('#sprite').get(0), playerX, playerY, spriteWidth, spriteHeight);
+  canvasContext.drawImage(realSprite, playerX, playerY, spriteWidth, spriteHeight);
 }

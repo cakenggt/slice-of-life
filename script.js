@@ -20,20 +20,34 @@ var interval = 20;
 var jumpSpeed = 3/interval;
 var acceleration = 0.2/interval;
 var gravity = 0.2/interval;
+var mapMap = {
+  "Map 1":"maps/map1.js",
+  "Map 2":"maps/map2.js"
+};
+
+function loadMap(mapName){
+  var url = mapMap[mapName];
+  $.getScript(url, loadAttributes);
+}
+
+function loadAttributes(){
+  xWidth = map[0].length;
+  zWidth = map[0][0].length;
+  yWidth = map.length;
+  maxWidth = Math.sqrt(Math.pow(xWidth, 2) + Math.pow(zWidth, 2));
+  pixelsPerBlock = width/maxWidth;
+  movementSpeed = (maxWidth/10)/interval;
+}
 
 //load all variables
 $(function(){
   canvas = $('canvas');
   width = canvas.width();
   height = canvas.height();
-  xWidth = map[0].length;
-  zWidth = map[0][0].length;
-  yWidth = map.length;
-  maxWidth = Math.sqrt(Math.pow(xWidth, 2) + Math.pow(zWidth, 2));
-  pixelsPerBlock = width/maxWidth;
+  loadAttributes();
   realCanvas = canvas.get(0);
   canvasContext = realCanvas.getContext('2d');
-  movementSpeed = (maxWidth/10)/interval;
+
 
   //movement engine
   setInterval(function(){

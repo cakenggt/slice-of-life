@@ -25,12 +25,21 @@ var jumpSpeed = 4/interval;
 var acceleration = 0.2/interval;
 var gravity = 0.2/interval;
 var mapMap = {
-  "Map 1":"maps/map1.js",
-  "Map 2":"maps/map2.js"
+  "Map 1":{url:"maps/map1.js", next:"Map 2"},
+  "Map 2":{url:"maps/map2.js"}
 };
+var currentMap = "Map 1";
+var won = false;
+
+function loadNextMap(){
+  loadMap(mapMap[currentMap].next);
+  currentMap = mapMap[currentMap].next;
+}
 
 function loadMap(mapName){
-  var url = mapMap[mapName];
+  $('#next').hide();
+  won = false;
+  var url = mapMap[mapName].url;
   $.getScript(url, loadAttributes);
 }
 
@@ -131,6 +140,7 @@ $(function(){
   $(document).on('keyup', function(data){
     keyState[data.keyCode || data.which] = false;
   });
+  $('#next').on('click', loadNextMap);
 });
 
 function canMoveHere(x, y, z){
@@ -281,9 +291,16 @@ function drawRectangle(color, x, y, rwidth, rheight, border){
 }
 
 function drawCanvas(){
-  var winText = map[Math.floor(position.y)][Math.floor(position.x)][Math.floor(position.z)].goal ?
-    ' You Won!!!' : '';
+  if (map[Math.floor(position.y)][Math.floor(position.x)][Math.floor(position.z)].goal){
+    won = true;
+  }
+  var winText = won ? ' You Won!!!' : '';
   $('h1').html(Math.floor(position.deg)+'&deg' + winText);
+  if (won && mapMap[currentMap].next){
+    var next = mapMap[currentMap].next;
+    $('#next').text('Next map:' + mapMap[currentMap].next);
+    $('#next').show();
+  }
   canvasContext.clearRect(0, 0, width, height);
   var sliceAttributes = getSliceAttributes();
   var indexColorLine = getColorLine(0);

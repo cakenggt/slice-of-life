@@ -129,4 +129,6 @@ function setGameVarForMap(givenMap){
   givenMap = convertTroxelMap(givenMap);
   position = givenMap.playerPos;
   map = givenMap.tiles;
+  playerWidth = givenMap.playerWidth;
+  playerJump = givenMap.playerJump;
 }

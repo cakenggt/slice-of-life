@@ -8,6 +8,7 @@ var zWidth;
 var yWidth;
 var maxWidth;
 var pixelsPerBlock;
+var playerWidth;
 var realCanvas;
 var canvasContext;
 var keyState = {};
@@ -19,8 +20,10 @@ var spriteWidth;
 var spriteHeight;
 //one divided by this number
 var interval = 20;
+//player jump given by map
+var playerJump;
 //in blocks
-var jumpSpeed = 4/interval;
+var jumpSpeed;
 var acceleration = 0.2/interval;
 var gravity = 0.2/interval;
 var mapMap = {
@@ -53,8 +56,9 @@ function loadAttributes(){
   realSprite = $('#sprite').get(0);
   reverseSprite = $('#sprite-reverse').get(0);
   //blocks multiplied by pixels to get pixels
-  spriteWidth = 0.9*pixelsPerBlock;
+  spriteWidth = playerWidth*pixelsPerBlock;
   spriteHeight = (spriteWidth/realSprite.width)*realSprite.height;
+  jumpSpeed = playerJump/interval;
   won = false;
 }
 

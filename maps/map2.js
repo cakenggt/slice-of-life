@@ -6,6 +6,8 @@ setGameVarForMap({
   deg: 0,
   vel: new vector(0, 0, 0)
   },
+  playerWidth:0.9,
+  playerJump:4,
   tiles:[],
   troxel:{
     "x": 8,

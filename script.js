@@ -30,6 +30,7 @@ var mapMap = {
 var currentMap = "Map 1";
 var won = false;
 var spriteReversed = false;
+var canClimbBlocks = false;
 
 function loadNextMap(){
   loadMap(mapMap[currentMap].next);
@@ -87,6 +88,15 @@ $(function(){
       canMoveHere(newX, position.y, newZ)){
       position.x = newX;
       position.z = newZ;
+    }
+    else if (canClimbBlocks){
+      //Code for climbing blocks
+      if (canMoveHere(newX, position.y+(spriteHeight/pixelsPerBlock)+1, newZ) &&
+        canMoveHere(newX, position.y+1, newZ)){
+        position.x = newX;
+        position.z = newZ;
+        position.y = Math.floor(position.y+1);
+      }
     }
 
     //key controls

@@ -33,7 +33,7 @@ var mapMap = {
 var currentMap = "Map 1";
 var won = false;
 var spriteReversed = false;
-var canClimbBlocks = false;
+var canClimbBlocks;
 
 function loadNextMap(){
   loadMap(mapMap[currentMap].next);

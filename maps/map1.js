@@ -8,6 +8,7 @@ setGameVarForMap({
   },
   playerWidth:0.9,
   playerJump:4,
+  canClimbBlocks:false,
   tiles:[],
   troxel:{
     "x": 8,

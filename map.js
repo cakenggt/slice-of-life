@@ -131,4 +131,5 @@ function setGameVarForMap(givenMap){
   map = givenMap.tiles;
   playerWidth = givenMap.playerWidth;
   playerJump = givenMap.playerJump;
+  canClimbBlocks = givenMap.canClimbBlocks;
 }

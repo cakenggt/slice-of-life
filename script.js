@@ -3,8 +3,6 @@ function mod(n, m) {
 }
 
 var canvas;
-var width;
-var height;
 var xWidth;
 var zWidth;
 var yWidth;
@@ -47,7 +45,7 @@ function loadAttributes(){
   zWidth = map[0][0].length;
   yWidth = map.length;
   maxWidth = Math.sqrt(Math.pow(xWidth, 2) + Math.pow(zWidth, 2));
-  pixelsPerBlock = width/maxWidth;
+  pixelsPerBlock = realCanvas.width/maxWidth;
   movementSpeed = (maxWidth/10)/interval;
   realSprite = $('#sprite').get(0);
   //blocks multiplied by pixels to get pixels
@@ -59,11 +57,10 @@ function loadAttributes(){
 //load all variables
 $(function(){
   canvas = $('canvas');
-  width = canvas.width();
-  height = canvas.height();
-  loadAttributes();
   realCanvas = canvas.get(0);
+  resizeCanvas();
   canvasContext = realCanvas.getContext('2d');
+  loadAttributes();
 
 
   //movement engine
@@ -323,6 +320,14 @@ function drawRectangle(color, x, y, rwidth, rheight, border){
   canvasContext.fillRect(x, y, rwidth, rheight);
 }
 
+function resizeCanvas(){
+  //Resize canvas to smallest of window width and height
+  var newSize = window.innerWidth > window.innerHeight ?
+    window.innerHeight : window.innerWidth;
+  realCanvas.width = newSize/2;
+  realCanvas.height = newSize/2;
+}
+
 function drawCanvas(){
   if (map[Math.floor(position.y)][Math.floor(position.x)][Math.floor(position.z)].goal){
     won = true;
@@ -334,12 +339,14 @@ function drawCanvas(){
     $('#next').text('Next map:' + mapMap[currentMap].next);
     $('#next').show();
   }
-  canvasContext.clearRect(0, 0, width, height);
+  //clear canvas
+  canvasContext.clearRect(0, 0, realCanvas.width, realCanvas.height);
+  resizeCanvas();
   var sliceAttributes = getSliceAttributes();
   var indexColorLine = getColorLine(0);
-  var padding = Math.floor((width-(indexColorLine.mapWidth*pixelsPerBlock))/2);
+  var padding = Math.floor((realCanvas.width-(indexColorLine.mapWidth*pixelsPerBlock))/2);
   //for each y level
-  var yPos = height-Math.floor(pixelsPerBlock);
+  var yPos = realCanvas.height-Math.floor(pixelsPerBlock);
   for (var y = 0; y < map.length; y++){
     //determine which direction to draw the rectangles with the direction attr
     var colorLine = getColorLine(y);
@@ -364,6 +371,6 @@ function drawCanvas(){
 
   //calculate player's position
   var playerX = padding + indexColorLine.playerDeepness*pixelsPerBlock - (spriteWidth/2);
-  var playerY = height - position.y*pixelsPerBlock - spriteHeight;
+  var playerY = realCanvas.height - position.y*pixelsPerBlock - spriteHeight;
   canvasContext.drawImage(realSprite, playerX, playerY, spriteWidth, spriteHeight);
 }

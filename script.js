@@ -333,7 +333,8 @@ function drawCanvas(){
     won = true;
   }
   var winText = won ? ' You Won!!!' : '';
-  $('h1').html(Math.floor(position.deg)+'&deg' + winText);
+  //$('h1').html(Math.floor(position.deg)+'&deg' + winText);
+  $('h1').html(winText);
   if (won && mapMap[currentMap].next){
     var next = mapMap[currentMap].next;
     $('#next').text('Next map:' + mapMap[currentMap].next);
@@ -369,8 +370,21 @@ function drawCanvas(){
     yPos -= Math.floor(pixelsPerBlock);
   }
 
+  drawSprite(indexColorLine, padding);
+}
+
+function drawSprite(indexColorLine, padding){
   //calculate player's position
   var playerX = padding + indexColorLine.playerDeepness*pixelsPerBlock - (spriteWidth/2);
   var playerY = realCanvas.height - position.y*pixelsPerBlock - spriteHeight;
   canvasContext.drawImage(realSprite, playerX, playerY, spriteWidth, spriteHeight);
+  canvasContext.save();
+  //draw ellipse
+  var ellipseHeight = spriteWidth*0.1;
+  canvasContext.beginPath();
+  canvasContext.ellipse(playerX+(0.75*spriteWidth), playerY+(0.3*spriteHeight),
+    Math.abs(Math.cos(getRadians())*ellipseHeight), ellipseHeight, 0, 0, 2*Math.PI);
+  canvasContext.strokeStyle='green';
+  canvasContext.stroke();
+  canvasContext.restore();
 }

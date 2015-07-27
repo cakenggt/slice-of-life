@@ -13,6 +13,7 @@ var canvasContext;
 var keyState = {};
 var movementSpeed;
 var realSprite;
+var reverseSprite;
 //in px
 var spriteWidth;
 var spriteHeight;
@@ -28,6 +29,7 @@ var mapMap = {
 };
 var currentMap = "Map 1";
 var won = false;
+var spriteReversed = false;
 
 function loadNextMap(){
   loadMap(mapMap[currentMap].next);
@@ -48,6 +50,7 @@ function loadAttributes(){
   pixelsPerBlock = realCanvas.width/maxWidth;
   movementSpeed = (maxWidth/10)/interval;
   realSprite = $('#sprite').get(0);
+  reverseSprite = $('#sprite-reverse').get(0);
   //blocks multiplied by pixels to get pixels
   spriteWidth = 0.9*pixelsPerBlock;
   spriteHeight = (spriteWidth/realSprite.width)*realSprite.height;
@@ -111,6 +114,7 @@ $(function(){
     }
     if (keyState[39] || keyState[68]){
       //go right
+      spriteReversed = false;
       x = position.vel.length() < movementSpeed ? position.vel.x + acceleration*Math.cos(getRadians()) : movementSpeed*Math.cos(getRadians());
       z = position.vel.length() < movementSpeed ? position.vel.z + acceleration*Math.sin(getRadians()) : movementSpeed*Math.sin(getRadians());
       position.vel.x = x;
@@ -118,6 +122,7 @@ $(function(){
     }
     else if (keyState[37] || keyState[65]){
       //go left
+      spriteReversed = true;
       x = position.vel.length() < movementSpeed ? position.vel.x - acceleration*Math.cos(getRadians()) : -movementSpeed*Math.cos(getRadians());
       z = position.vel.length() < movementSpeed ? position.vel.z - acceleration*Math.sin(getRadians()) : -movementSpeed*Math.sin(getRadians());
       position.vel.x = x;
@@ -377,12 +382,15 @@ function drawSprite(indexColorLine, padding){
   //calculate player's position
   var playerX = padding + indexColorLine.playerDeepness*pixelsPerBlock - (spriteWidth/2);
   var playerY = realCanvas.height - position.y*pixelsPerBlock - spriteHeight;
-  canvasContext.drawImage(realSprite, playerX, playerY, spriteWidth, spriteHeight);
+  canvasContext.drawImage(spriteReversed ? reverseSprite : realSprite, playerX,
+    playerY, spriteWidth, spriteHeight);
   canvasContext.save();
   //draw ellipse
   var ellipseHeight = spriteWidth*0.1;
   canvasContext.beginPath();
-  canvasContext.ellipse(playerX+(0.75*spriteWidth), playerY+(0.3*spriteHeight),
+  var ellipseX = spriteReversed ? playerX+(0.25*spriteWidth) :
+    playerX+(0.75*spriteWidth);
+  canvasContext.ellipse(ellipseX, playerY+(0.3*spriteHeight),
     Math.abs(Math.cos(getRadians())*ellipseHeight), ellipseHeight, 0, 0, 2*Math.PI);
   canvasContext.strokeStyle='green';
   canvasContext.stroke();

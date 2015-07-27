@@ -381,7 +381,7 @@ function drawCanvas(){
 function drawSprite(indexColorLine, padding){
   //calculate player's position
   var playerX = padding + indexColorLine.playerDeepness*pixelsPerBlock - (spriteWidth/2);
-  var playerY = realCanvas.height - position.y*pixelsPerBlock - spriteHeight;
+  var playerY = realCanvas.height - position.y*Math.floor(pixelsPerBlock) - spriteHeight;
   canvasContext.drawImage(spriteReversed ? reverseSprite : realSprite, playerX,
     playerY, spriteWidth, spriteHeight);
   canvasContext.save();

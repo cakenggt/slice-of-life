@@ -93,10 +93,24 @@ $(function(){
     var x;
     var z;
     if (keyState[69]){
+      //rotate anticlockwise
       position.deg = mod(position.deg - 1.001,360);
+      //If turning puts the player into a wall, move them 1/3 of the way
+      //to the center of the block
+      while (!canMoveHere(position.x, position.y, position.z)){
+        position.x -= (position.x-(Math.floor(position.x)+0.5))/3;
+        position.z -= (position.z-(Math.floor(position.z)+0.5))/3;
+      }
     }
     else if (keyState[81]){
+      //rotate clockwise
       position.deg = mod(position.deg + 1.001,360);
+      //If turning puts the player into a wall, move them 1/3 of the way
+      //to the center of the block
+      while (!canMoveHere(position.x, position.y, position.z)){
+        position.x -= (position.x-(Math.floor(position.x)+0.5))/3;
+        position.z -= (position.z-(Math.floor(position.z)+0.5))/3;
+      }
     }
     if (keyState[39] || keyState[68]){
       //go right
@@ -143,12 +157,31 @@ $(function(){
   $('#next').on('click', loadNextMap);
 });
 
+/*
+Checks for collision on the left and right of provided point. 1/2 of
+sprite width is added and subtracted from the line slope to get these
+points.
+*/
 function canMoveHere(x, y, z){
-  var canMove = x < xWidth && x >= 0 &&
-    z < zWidth && z >= 0 &&
-    y < yWidth && y >= 0;
-  canMove = canMove && !map[Math.floor(y)][Math.floor(x)][Math.floor(z)].solid;
-  return canMove;
+  if (y > yWidth || y < 0){
+    return false;
+  }
+  //points to left and right
+  var points = [];
+  var spriteBlockWidth = spriteWidth/pixelsPerBlock;
+  var halfSpriteWidth = spriteBlockWidth/2;
+  points.push(new point(x+(Math.cos(getRadians())*halfSpriteWidth), z+(Math.sin(getRadians())*halfSpriteWidth)));
+  points.push(new point(x-(Math.cos(getRadians())*halfSpriteWidth), z-(Math.sin(getRadians())*halfSpriteWidth)));
+  for (var pointIt = 0; pointIt < points.length; pointIt++){
+    var selPoint = points[pointIt];
+    var canMove = selPoint.x < xWidth && selPoint.x >= 0 &&
+      selPoint.z < zWidth && selPoint.z >= 0;
+    canMove = canMove && !map[Math.floor(y)][Math.floor(selPoint.x)][Math.floor(selPoint.z)].solid;
+    if (!canMove){
+      return false;
+    }
+  }
+  return true;
 }
 
 //point object

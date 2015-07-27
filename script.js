@@ -33,7 +33,7 @@ var mapMap = {
 var currentMap = "Map 1";
 var won = false;
 var spriteReversed = false;
-var canClimbBlocks;
+var climbableBlocks;
 
 function loadNextMap(){
   loadMap(mapMap[currentMap].next);
@@ -87,19 +87,20 @@ $(function(){
     //movement
     var newX = position.x+position.vel.x;
     var newZ = position.z+position.vel.z;
-    //Check to make sure that the player isn't jumping their head through anything
-    if (canMoveHere(newX, position.y+(spriteHeight/pixelsPerBlock), newZ) &&
-      canMoveHere(newX, position.y, newZ)){
-      position.x = newX;
-      position.z = newZ;
-    }
-    else if (canClimbBlocks){
-      //Code for climbing blocks
-      if (canMoveHere(newX, position.y+(spriteHeight/pixelsPerBlock)+1, newZ) &&
-        canMoveHere(newX, position.y+1, newZ)){
+    /*
+    Check to make sure that the player isn't jumping their head through anything.
+    Also check to make sure the player won't collide with anything on either side.
+    Also do block climbing calculations.
+    */
+    for (var i = 0; i <= climbableBlocks; i++){
+      if (canMoveHere(newX, position.y+(spriteHeight/pixelsPerBlock)+i, newZ) &&
+        canMoveHere(newX, position.y+i, newZ)){
         position.x = newX;
         position.z = newZ;
-        position.y = Math.floor(position.y+1);
+        if (i > 0){
+          position.y = Math.floor(position.y+1);
+        }
+        break;
       }
     }
 

@@ -92,47 +92,103 @@ function setGameVarForMap(givenMap){
   position = givenMap.playerPos;
   map = givenMap.tiles;
   playerWidth = givenMap.playerWidth;
-  playerJump = givenMap.playerJump;
+  speed = givenMap.speed;
   climbableBlocks = givenMap.climbableBlocks;
 }
 
 //Convert link to tile array
 function convertLinkToMap(url){
-  var data = atob(url.substring(url.indexOf('#m=')+3, url.length)).split('').map(function(c){
+  var ref = atob(url.substring(url.indexOf('#m=')+3, url.length)).split('').map(function(c){
     return c.charCodeAt(0);
   });
   var voxels = [];
-  var x = data[0];
-  var y = data[1];
-  var z = data[2];
-  var readOnly = data[3];
-  var i = 4;
+  var x = ref[0];
+  var y = ref[1];
+  var z = ref[2];
+  var readOnly = ref[3];
+  var slice = [].slice;
+  var data = 5 <= ref.length ? slice.call(ref, 4) : [];
+  var i = 0;
   var r = 0;
-  for (var zi = 0; zi < z; zi++){
-    for (var yi = 0; yi < y; yi++){
-      for (var xi = 0; xi < x; xi++){
-        if (r === 0){
-          if (data[i] > 127) {// read repeat value
-            r = data[i] - 127;
-            i++;
+  if (data[0] === 85){
+    paletteSize = 256 * data[1] + data[2];
+    short = data[1] === 0 && data[2] < 128 ? 1 : 2;
+    palette = [null];
+    for (j = k = 3, ref = paletteSize * 5 + 3; k < ref; j = k += 5) {
+      palette.push({
+        r: data[j + 1],
+        g: data[j + 2],
+        b: data[j + 3],
+        a: data[j + 4],
+        s: data[j] % 16,
+        t: data[j] >> 4
+      });
+    }
+    i = paletteSize * 5 + 3;
+    for (zj = 0; zj < z; zj += 1) {
+      for (yj = 0; yj < y; yj += 1) {
+        for (xj = 0; xj < x; xj += 1) {
+          if (r === 0) {
+            if (data[i] > 127) {
+              r = data[i] - 126;
+              i++;
+            } else {
+              r = 1;
+            }
+            if (short === 1) {
+              index = data[i];
+            } else {
+              index = data[i] * 256 + data[i + 1];
+            }
+            if (index !== 0) {
+              vox = palette[index];
+            } else {
+              vox = null;
+            }
+            i += short;
           }
-          else{
-            r = 1;
-          }
-          if (data[i] < 64) {// cache vox data
-            vox = {r: data[i + 1], g: data[i + 2], b: data[i + 3], a: data[i + 4], s: data[i] % 8, t: data[i] >> 3};
-            i += 5;
-          }
-          else{
-            vox = null;
-            i++;
-          }
-        }// apply vox data repeat often
-        voxels[yi] = voxels[yi] ? voxels[yi] : [];
-        voxels[yi][zi] = voxels[yi][zi] ? voxels[yi][zi] : [];
-        voxels[yi][zi][xi] = vox ? convertTroxelToTile({r: vox.r, g: vox.g, b: vox.b, a: vox.a, s: vox.s, t: vox.t}) :
-          convertTroxelToTile(null);
-        r--;
+          voxels[yj] = voxels[yj] ? voxels[yj] : [];
+          voxels[yj][xj] = voxels[yj][xj] ? voxels[yj][xj] : [];
+          voxels[yj][xj][zj] = vox ? convertTroxelToTile({
+            r: vox.r,
+            g: vox.g,
+            b: vox.b,
+            a: vox.a,
+            s: vox.s,
+            t: vox.t
+          }) : convertTroxelToTile(null);
+          r--;
+        }
+      }
+    }
+  }
+  else {
+    for (var zi = 0; zi < z; zi++){
+      for (var yi = 0; yi < y; yi++){
+        for (var xi = 0; xi < x; xi++){
+          if (r === 0){
+            if (data[i] > 127) {// read repeat value
+              r = data[i] - 127;
+              i++;
+            }
+            else{
+              r = 1;
+            }
+            if (data[i] < 64) {// cache vox data
+              vox = {r: data[i + 1], g: data[i + 2], b: data[i + 3], a: data[i + 4], s: data[i] % 8, t: data[i] >> 3};
+              i += 5;
+            }
+            else{
+              vox = null;
+              i++;
+            }
+          }// apply vox data repeat often
+          voxels[yi] = voxels[yi] ? voxels[yi] : [];
+          voxels[yi][xi] = voxels[yi][xi] ? voxels[yi][xi] : [];
+          voxels[yi][xi][zi] = vox ? convertTroxelToTile({r: vox.r, g: vox.g, b: vox.b, a: vox.a, s: vox.s, t: vox.t}) :
+            convertTroxelToTile(null);
+          r--;
+        }
       }
     }
   }

@@ -21,14 +21,15 @@ var spriteHeight;
 //one divided by this number
 var interval = 20;
 //player jump given by map
-var playerJump;
+var speed;
 //in blocks
 var jumpSpeed;
-var acceleration = 0.2/interval;
-var gravity = 0.2/interval;
+var acceleration;
+var gravity = speed*0.2/interval;
 var mapMap = {
   "Map 1":{url:"maps/map1.js", next:"Map 2"},
-  "Map 2":{url:"maps/map2.js"}
+  "Map 2":{url:"maps/map2.js", next:"Map 3"},
+  "Map 3":{url:"maps/map3.js"}
 };
 var currentMap = "Map 1";
 var won = false;
@@ -58,7 +59,8 @@ function loadAttributes(){
   //blocks multiplied by pixels to get pixels
   spriteWidth = playerWidth*pixelsPerBlock;
   spriteHeight = (spriteWidth/realSprite.width)*realSprite.height;
-  jumpSpeed = playerJump/interval;
+  jumpSpeed = (speed*4)/interval;
+  acceleration = speed*0.2/interval;
   won = false;
 }
 
@@ -73,8 +75,10 @@ $(function(){
 
   //movement engine
   setInterval(function(){
+    //console.log(Math.floor(position.y) + ', ' + Math.floor(position.x) + ', ' + Math.floor(position.z));
+    //console.log(map[Math.floor(position.y)][Math.floor(position.x)][Math.floor(position.z)]);
     //gravity engine
-    position.vel.y = position.vel.y > -0.1 ? position.vel.y - gravity : position.vel.y;
+    position.vel.y = position.vel.y > -0.1*speed ? position.vel.y - gravity : position.vel.y;
     var newY = position.y+position.vel.y;
     if (canMoveHere(position.x, newY, position.z)){
       position.y = newY;
@@ -150,7 +154,7 @@ $(function(){
     }
     if (keyState[38]  || keyState[87]){
       //jump
-      if (position.y%1 === 0){
+      if (!canMoveHere(position.x, position.y-0.00001, position.z)){
         position.vel.y = jumpSpeed;
       }
     }
@@ -346,6 +350,7 @@ function resizeCanvas(){
     window.innerHeight : window.innerWidth;
   realCanvas.width = newSize/2;
   realCanvas.height = newSize/2;
+  pixelsPerBlock = realCanvas.width/maxWidth;
 }
 
 function drawCanvas(){
@@ -395,7 +400,7 @@ function drawCanvas(){
 
 function drawSprite(indexColorLine, padding){
   //calculate player's position
-  var playerX = padding + indexColorLine.playerDeepness*pixelsPerBlock - (spriteWidth/2);
+  var playerX = padding + indexColorLine.playerDeepness*Math.floor(pixelsPerBlock) - (spriteWidth/2);
   var playerY = realCanvas.height - position.y*Math.floor(pixelsPerBlock) - spriteHeight;
   canvasContext.drawImage(spriteReversed ? reverseSprite : realSprite, playerX,
     playerY, spriteWidth, spriteHeight);

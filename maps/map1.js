@@ -7,8 +7,8 @@ setGameVarForMap({
   vel: new vector(0, 0, 0)
   },
   playerWidth:0.9,
-  playerJump:4,
+  speed:1,
   climbableBlocks:0,
   tiles:[],
-  troxelLink:'https://cakenggt.github.io/Troxel/#m=CAgIAJ8AgEAA/59AnwCAQAD/n0CfAIBAAP+fQJ8AgEAA/59AnwCAQAD/n0CfAIBAAP+DALk3yP+DQIMAuTfI/4NAgwC5N8j/g0CDALk3yP+DQJ8AgEAA/59AnwCAQAD/Cf//APCeQA=='
+  troxelLink:'https://cakenggt.github.io/Troxel/#m=CAgIAFUAAwCAQAD/ALk3yP8R//8A8J4BgwACAAODAAKFAAKFAAKAAJ4BgwAChQAChQAChQACgACeAYMAAoUAAoUAAoUAAoAAngGDAAKFAAKFAAKFAAKAAJ4BngCeAZ4AngGeAJ4BngA='
 });

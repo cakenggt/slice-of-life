@@ -71,43 +71,6 @@ function convertTroxelToTile(trox){
   }
 }
 
-/*
-Converts a troxel json export inside of a map to the map format and returns it.
-Also mutates the object.
-*/
-function convertTroxelMap(troxelMap){
-  var troxel = convertLinkToMap(troxelMap.troxelLink);
-  var result = [];
-  var voxels = troxel.voxels;
-  for (var y = 0; y < troxel.y; y++){
-    result[y] = [];
-    for (var x = 0; x < troxel.x; x++){
-      result[y][x] = [];
-      for (var z = 0; z < troxel.z; z++){
-        //If the troxel doesn't exist, then fill with air
-        if (voxels[x]){
-          if (voxels[x][y]){
-            if (voxels[x][y][z]){
-              result[y][x][z] = convertTroxelToTile(voxels[x][y][z]);
-            }
-            else{
-              result[y][x][z] = tileMap[0];
-            }
-          }
-          else{
-            result[y][x][z] = tileMap[0];
-          }
-        }
-        else{
-          result[y][x][z] = tileMap[0];
-        }
-      }
-    }
-  }
-  troxelMap.tiles = result;
-  return troxelMap;
-}
-
 /*list of tile materials in 3d
   format is [y][x][z]
   Like this:
@@ -125,7 +88,7 @@ x 3
 var map;
 
 function setGameVarForMap(givenMap){
-  givenMap = convertTroxelMap(givenMap);
+  givenMap.tiles = convertLinkToMap(givenMap.troxelLink);
   position = givenMap.playerPos;
   map = givenMap.tiles;
   playerWidth = givenMap.playerWidth;
@@ -133,7 +96,7 @@ function setGameVarForMap(givenMap){
   climbableBlocks = givenMap.climbableBlocks;
 }
 
-//Convert link to troxel map
+//Convert link to tile array
 function convertLinkToMap(url){
   var data = atob(url.substring(url.indexOf('#m=')+3, url.length)).split('').map(function(c){
     return c.charCodeAt(0);
@@ -164,15 +127,14 @@ function convertLinkToMap(url){
             vox = null;
             i++;
           }
-        }
-        if (vox) {// apply vox data repeat often (if vox not empty)
-          voxels[zi] = voxels[zi] ? voxels[zi] : [];
-          voxels[zi][yi] = voxels[zi][yi] ? voxels[zi][yi] : [];
-          voxels[zi][yi][xi] = {r: vox.r, g: vox.g, b: vox.b, a: vox.a, s: vox.s, t: vox.t};
-        }
+        }// apply vox data repeat often
+        voxels[yi] = voxels[yi] ? voxels[yi] : [];
+        voxels[yi][zi] = voxels[yi][zi] ? voxels[yi][zi] : [];
+        voxels[yi][zi][xi] = vox ? convertTroxelToTile({r: vox.r, g: vox.g, b: vox.b, a: vox.a, s: vox.s, t: vox.t}) :
+          convertTroxelToTile(null);
         r--;
       }
     }
   }
-  return {'x':x, 'y':y, 'z':z, 'voxels':voxels};
+  return voxels;
 }

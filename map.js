@@ -76,7 +76,7 @@ Converts a troxel json export inside of a map to the map format and returns it.
 Also mutates the object.
 */
 function convertTroxelMap(troxelMap){
-  var troxel = troxelMap.troxel;
+  var troxel = convertLinkToMap(troxelMap.troxelLink);
   var result = [];
   var voxels = troxel.voxels;
   for (var y = 0; y < troxel.y; y++){
@@ -124,7 +124,6 @@ x 3
 */
 var map;
 
-//mapGenerator(map1);
 function setGameVarForMap(givenMap){
   givenMap = convertTroxelMap(givenMap);
   position = givenMap.playerPos;
@@ -132,4 +131,48 @@ function setGameVarForMap(givenMap){
   playerWidth = givenMap.playerWidth;
   playerJump = givenMap.playerJump;
   climbableBlocks = givenMap.climbableBlocks;
+}
+
+//Convert link to troxel map
+function convertLinkToMap(url){
+  var data = atob(url.substring(url.indexOf('#m=')+3, url.length)).split('').map(function(c){
+    return c.charCodeAt(0);
+  });
+  var voxels = [];
+  var x = data[0];
+  var y = data[1];
+  var z = data[2];
+  var readOnly = data[3];
+  var i = 4;
+  var r = 0;
+  for (var zi = 0; zi < z; zi++){
+    for (var yi = 0; yi < y; yi++){
+      for (var xi = 0; xi < x; xi++){
+        if (r === 0){
+          if (data[i] > 127) {// read repeat value
+            r = data[i] - 127;
+            i++;
+          }
+          else{
+            r = 1;
+          }
+          if (data[i] < 64) {// cache vox data
+            vox = {r: data[i + 1], g: data[i + 2], b: data[i + 3], a: data[i + 4], s: data[i] % 8, t: data[i] >> 3};
+            i += 5;
+          }
+          else{
+            vox = null;
+            i++;
+          }
+        }
+        if (vox) {// apply vox data repeat often (if vox not empty)
+          voxels[zi] = voxels[zi] ? voxels[zi] : [];
+          voxels[zi][yi] = voxels[zi][yi] ? voxels[zi][yi] : [];
+          voxels[zi][yi][xi] = {r: vox.r, g: vox.g, b: vox.b, a: vox.a, s: vox.s, t: vox.t};
+        }
+        r--;
+      }
+    }
+  }
+  return {'x':x, 'y':y, 'z':z, 'voxels':voxels};
 }

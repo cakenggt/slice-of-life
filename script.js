@@ -17,8 +17,6 @@ var reverseSprite;
 //in px
 var spriteWidth;
 var spriteHeight;
-//multiply the largest y crosssection by this to get the interval
-var intervalFraction = 0.003;
 //one divided by this number
 var interval = 33;
 //player jump given by map
@@ -39,10 +37,12 @@ var won = false;
 var spriteReversed = false;
 var climbableBlocks;
 var gameLoop;
+var imageData;
 
 function loadNextMap(){
   loadMap(mapMap[currentMap].next);
   currentMap = mapMap[currentMap].next;
+  drawCanvas();
 }
 
 function loadMap(mapName){
@@ -56,13 +56,6 @@ function loadAttributes(){
   xWidth = map[0].length;
   zWidth = map[0][0].length;
   yWidth = map.length;
-  if ((xWidth*yWidth) > (zWidth*yWidth)){
-    interval = intervalFraction*xWidth*yWidth;
-  }
-  else{
-    interval = intervalFraction*zWidth*yWidth;
-  }
-  interval = interval < 33 ? 33 : interval;
   maxWidth = Math.sqrt(Math.pow(xWidth, 2) + Math.pow(zWidth, 2));
   pixelsPerBlock = realCanvas.width/maxWidth;
   movementSpeed = speed*0.004*interval;
@@ -102,6 +95,17 @@ $(function(){
 });
 
 function gameLoopFunction(){
+  if (map[Math.floor(position.y)][Math.floor(position.x)][Math.floor(position.z)].goal){
+    won = true;
+  }
+  var winText = won ? ' You Won!!!' : '';
+  //$('h1').html(Math.floor(position.deg)+'&deg' + winText);
+  $('h1').html(winText);
+  if (won && mapMap[currentMap].next){
+    var next = mapMap[currentMap].next;
+    $('#next').text('Next map:' + mapMap[currentMap].next);
+    $('#next').show();
+  }
   //console.log(Math.floor(position.y) + ', ' + Math.floor(position.x) + ', ' + Math.floor(position.z));
   //console.log(map[Math.floor(position.y)][Math.floor(position.x)][Math.floor(position.z)]);
   //gravity engine
@@ -136,6 +140,7 @@ function gameLoopFunction(){
       break;
     }
   }
+  drawSprite();
 
   //key controls
   var x;
@@ -149,6 +154,7 @@ function gameLoopFunction(){
       position.x -= (position.x-((Math.floor(position.x/speed)+0.5)*speed))/3;
       position.z -= (position.z-((Math.floor(position.z/speed)+0.5)*speed))/3;
     }
+    drawCanvas();
   }
   else if (keyState[81]){
     //rotate clockwise
@@ -159,6 +165,7 @@ function gameLoopFunction(){
       position.x -= (position.x-((Math.floor(position.x/speed)+0.5)*speed))/3;
       position.z -= (position.z-((Math.floor(position.z/speed)+0.5)*speed))/3;
     }
+    drawCanvas();
   }
   if (keyState[39] || keyState[68]){
     //go right
@@ -192,7 +199,6 @@ function gameLoopFunction(){
       position.vel.y *= 1/2;
     }
   }
-  drawCanvas();
 }
 
 /*
@@ -372,17 +378,6 @@ function resizeCanvas(){
 }
 
 function drawCanvas(){
-  if (map[Math.floor(position.y)][Math.floor(position.x)][Math.floor(position.z)].goal){
-    won = true;
-  }
-  var winText = won ? ' You Won!!!' : '';
-  //$('h1').html(Math.floor(position.deg)+'&deg' + winText);
-  $('h1').html(winText);
-  if (won && mapMap[currentMap].next){
-    var next = mapMap[currentMap].next;
-    $('#next').text('Next map:' + mapMap[currentMap].next);
-    $('#next').show();
-  }
   //clear canvas
   canvasContext.clearRect(0, 0, realCanvas.width, realCanvas.height);
   resizeCanvas();
@@ -412,17 +407,21 @@ function drawCanvas(){
     drawRectangle(tileMap[0].color, lastStartPos, yPos, padding, Math.floor(pixelsPerBlock));
     yPos -= Math.floor(pixelsPerBlock);
   }
-
-  drawSprite(indexColorLine, padding);
+  //save the canvas image
+  imageData = canvasContext.getImageData(0, 0, realCanvas.width, realCanvas.height);
+  drawSprite();
 }
 
-function drawSprite(indexColorLine, padding){
+function drawSprite(){
+  //restore the canvas image
+  canvasContext.putImageData(imageData, 0, 0);
+  var indexColorLine = getColorLine(0);
+  var padding = Math.floor((realCanvas.width-(indexColorLine.mapWidth*pixelsPerBlock))/2);
   //calculate player's position
   var playerX = padding + indexColorLine.playerDeepness*Math.floor(pixelsPerBlock) - (spriteWidth/2);
   var playerY = realCanvas.height - position.y*Math.floor(pixelsPerBlock) - spriteHeight;
   canvasContext.drawImage(spriteReversed ? reverseSprite : realSprite, playerX,
     playerY, spriteWidth, spriteHeight);
-  canvasContext.save();
   //draw ellipse
   var ellipseHeight = spriteWidth*0.1;
   canvasContext.beginPath();
@@ -432,5 +431,4 @@ function drawSprite(indexColorLine, padding){
     Math.abs(Math.cos(getRadians())*ellipseHeight), ellipseHeight, 0, 0, 2*Math.PI);
   canvasContext.strokeStyle='green';
   canvasContext.stroke();
-  canvasContext.restore();
 }

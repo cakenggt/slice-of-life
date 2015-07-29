@@ -12,20 +12,23 @@ var playerWidth;
 var realCanvas;
 var canvasContext;
 var keyState = {};
-var movementSpeed;
 var realSprite;
 var reverseSprite;
 //in px
 var spriteWidth;
 var spriteHeight;
+//multiply the largest y crosssection by this to get the interval
+var intervalFraction = 0.003;
 //one divided by this number
-var interval = 20;
+var interval = 33;
 //player jump given by map
 var speed;
-//in blocks
+//in blocks, calculated from speed
 var jumpSpeed;
+//calculated from speed
+var movementSpeed;
 var acceleration;
-var gravity = speed*0.2/interval;
+var gravity = speed*0.0005*interval;
 var mapMap = {
   "Map 1":{url:"maps/map1.js", next:"Map 2"},
   "Map 2":{url:"maps/map2.js", next:"Map 3"},
@@ -35,6 +38,7 @@ var currentMap = "Map 1";
 var won = false;
 var spriteReversed = false;
 var climbableBlocks;
+var gameLoop;
 
 function loadNextMap(){
   loadMap(mapMap[currentMap].next);
@@ -48,20 +52,29 @@ function loadMap(mapName){
 }
 
 function loadAttributes(){
+  clearTimeout(gameLoop);
   xWidth = map[0].length;
   zWidth = map[0][0].length;
   yWidth = map.length;
+  if ((xWidth*yWidth) > (zWidth*yWidth)){
+    interval = intervalFraction*xWidth*yWidth;
+  }
+  else{
+    interval = intervalFraction*zWidth*yWidth;
+  }
+  interval = interval < 33 ? 33 : interval;
   maxWidth = Math.sqrt(Math.pow(xWidth, 2) + Math.pow(zWidth, 2));
   pixelsPerBlock = realCanvas.width/maxWidth;
-  movementSpeed = (maxWidth/10)/interval;
+  movementSpeed = speed*0.004*interval;
   realSprite = $('#sprite').get(0);
   reverseSprite = $('#sprite-reverse').get(0);
   //blocks multiplied by pixels to get pixels
   spriteWidth = playerWidth*pixelsPerBlock;
   spriteHeight = (spriteWidth/realSprite.width)*realSprite.height;
-  jumpSpeed = (speed*4)/interval;
-  acceleration = speed*0.2/interval;
+  jumpSpeed = speed*0.25;
+  acceleration = speed*0.001*interval;
   won = false;
+  gameLoop = setInterval(gameLoopFunction, interval);
 }
 
 //load all variables
@@ -74,98 +87,7 @@ $(function(){
 
 
   //movement engine
-  setInterval(function(){
-    //console.log(Math.floor(position.y) + ', ' + Math.floor(position.x) + ', ' + Math.floor(position.z));
-    //console.log(map[Math.floor(position.y)][Math.floor(position.x)][Math.floor(position.z)]);
-    //gravity engine
-    position.vel.y = position.vel.y > -0.1*speed ? position.vel.y - gravity : position.vel.y;
-    var newY = position.y+position.vel.y;
-    if (canMoveHere(position.x, newY, position.z)){
-      position.y = newY;
-    }
-    else{
-      if (position.y%1 !== 0){
-        position.y = Math.floor(position.y);
-      }
-    }
-    //movement
-    var newX = position.x+position.vel.x;
-    var newZ = position.z+position.vel.z;
-    /*
-    Check to make sure that the player isn't jumping their head through anything.
-    Also check to make sure the player won't collide with anything on either side.
-    Also do block climbing calculations.
-    */
-    for (var i = 0; i <= climbableBlocks; i++){
-      if (canMoveHere(newX, position.y+(spriteHeight/pixelsPerBlock)+i, newZ) &&
-        canMoveHere(newX, position.y+i, newZ)){
-        position.x = newX;
-        position.z = newZ;
-        if (i > 0){
-          position.y = Math.floor(position.y+1);
-        }
-        break;
-      }
-    }
-
-    //key controls
-    var x;
-    var z;
-    if (keyState[69]){
-      //rotate anticlockwise
-      position.deg = mod(position.deg - 1.001,360);
-      //If turning puts the player into a wall, move them 1/3 of the way
-      //to the center of the block
-      while (!canMoveHere(position.x, position.y, position.z)){
-        position.x -= (position.x-(Math.floor(position.x)+0.5))/3;
-        position.z -= (position.z-(Math.floor(position.z)+0.5))/3;
-      }
-    }
-    else if (keyState[81]){
-      //rotate clockwise
-      position.deg = mod(position.deg + 1.001,360);
-      //If turning puts the player into a wall, move them 1/3 of the way
-      //to the center of the block
-      while (!canMoveHere(position.x, position.y, position.z)){
-        position.x -= (position.x-(Math.floor(position.x)+0.5))/3;
-        position.z -= (position.z-(Math.floor(position.z)+0.5))/3;
-      }
-    }
-    if (keyState[39] || keyState[68]){
-      //go right
-      spriteReversed = false;
-      x = position.vel.length() < movementSpeed ? position.vel.x + acceleration*Math.cos(getRadians()) : movementSpeed*Math.cos(getRadians());
-      z = position.vel.length() < movementSpeed ? position.vel.z + acceleration*Math.sin(getRadians()) : movementSpeed*Math.sin(getRadians());
-      position.vel.x = x;
-      position.vel.z = z;
-    }
-    else if (keyState[37] || keyState[65]){
-      //go left
-      spriteReversed = true;
-      x = position.vel.length() < movementSpeed ? position.vel.x - acceleration*Math.cos(getRadians()) : -movementSpeed*Math.cos(getRadians());
-      z = position.vel.length() < movementSpeed ? position.vel.z - acceleration*Math.sin(getRadians()) : -movementSpeed*Math.sin(getRadians());
-      position.vel.x = x;
-      position.vel.z = z;
-    }
-    else{
-      //movement slowdown
-      position.vel.x *= 1/2;
-      position.vel.z *= 1/2;
-    }
-    if (keyState[38]  || keyState[87]){
-      //jump
-      if (!canMoveHere(position.x, position.y-0.00001, position.z)){
-        position.vel.y = jumpSpeed;
-      }
-    }
-    else{
-      if (position.vel.y > 0){
-        position.vel.y *= 1/2;
-      }
-    }
-
-    drawCanvas();
-  }, interval);
+  gameLoop = setInterval(gameLoopFunction, interval);
 
   drawCanvas();
   $(document).on('keydown', function(data){
@@ -177,6 +99,101 @@ $(function(){
   });
   $('#next').on('click', loadNextMap);
 });
+
+function gameLoopFunction(){
+  //console.log(Math.floor(position.y) + ', ' + Math.floor(position.x) + ', ' + Math.floor(position.z));
+  //console.log(map[Math.floor(position.y)][Math.floor(position.x)][Math.floor(position.z)]);
+  //gravity engine
+  position.vel.y = position.vel.y > -gravity*10 ? position.vel.y - gravity : position.vel.y;
+  var newY = position.y+position.vel.y;
+  if (canMoveHere(position.x, newY, position.z)){
+    position.y = newY;
+  }
+  else{
+    //cancel gravity when you cant move down
+    position.vel.y = 0;
+    if (position.y%1 !== 0){
+      position.y = Math.floor(position.y);
+    }
+  }
+  //movement
+  var newX = position.x+position.vel.x;
+  var newZ = position.z+position.vel.z;
+  /*
+  Check to make sure that the player isn't jumping their head through anything.
+  Also check to make sure the player won't collide with anything on either side.
+  Also do block climbing calculations.
+  */
+  for (var i = 0; i <= climbableBlocks; i++){
+    if (canMoveHere(newX, position.y+(spriteHeight/pixelsPerBlock)+i, newZ) &&
+      canMoveHere(newX, position.y+i, newZ)){
+      position.x = newX;
+      position.z = newZ;
+      if (i > 0){
+        position.y = Math.floor(position.y+1);
+      }
+      break;
+    }
+  }
+
+  //key controls
+  var x;
+  var z;
+  if (keyState[69]){
+    //rotate anticlockwise
+    position.deg = mod(position.deg - 1.001,360);
+    //If turning puts the player into a wall, move them 1/3 of the way
+    //to the center of the block
+    while (!canMoveHere(position.x, position.y, position.z)){
+      position.x -= (position.x-(Math.floor(position.x/speed)*speed+0.5*speed))/3;
+      position.z -= (position.z-(Math.floor(position.z/speed)*speed+0.5*speed))/3;
+    }
+  }
+  else if (keyState[81]){
+    //rotate clockwise
+    position.deg = mod(position.deg + 1.001,360);
+    //If turning puts the player into a wall, move them 1/3 of the way
+    //to the center of the block
+    while (!canMoveHere(position.x, position.y, position.z)){
+      position.x -= (position.x-(Math.floor(position.x/speed)*speed+0.5*speed))/3;
+      position.z -= (position.z-(Math.floor(position.z/speed)*speed+0.5*speed))/3;
+    }
+  }
+  if (keyState[39] || keyState[68]){
+    //go right
+    spriteReversed = false;
+    x = position.vel.length() < movementSpeed ? position.vel.x + acceleration*Math.cos(getRadians()) : movementSpeed*Math.cos(getRadians());
+    z = position.vel.length() < movementSpeed ? position.vel.z + acceleration*Math.sin(getRadians()) : movementSpeed*Math.sin(getRadians());
+    position.vel.x = x;
+    position.vel.z = z;
+  }
+  else if (keyState[37] || keyState[65]){
+    //go left
+    spriteReversed = true;
+    x = position.vel.length() < movementSpeed ? position.vel.x - acceleration*Math.cos(getRadians()) : -movementSpeed*Math.cos(getRadians());
+    z = position.vel.length() < movementSpeed ? position.vel.z - acceleration*Math.sin(getRadians()) : -movementSpeed*Math.sin(getRadians());
+    position.vel.x = x;
+    position.vel.z = z;
+  }
+  else{
+    //movement slowdown
+    position.vel.x *= 1/2;
+    position.vel.z *= 1/2;
+  }
+  if (keyState[38]  || keyState[87]){
+    //jump
+    if (!canMoveHere(position.x, position.y-0.001, position.z)){
+      position.vel.y = jumpSpeed;
+    }
+  }
+  else{
+    if (position.vel.y > 0){
+      position.vel.y *= 1/2;
+    }
+  }
+
+  drawCanvas();
+}
 
 /*
 Checks for collision on the left and right of provided point. 1/2 of

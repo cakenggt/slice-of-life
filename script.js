@@ -28,7 +28,7 @@ var jumpSpeed;
 //calculated from speed
 var movementSpeed;
 var acceleration;
-var gravity = speed*0.0005*interval;
+var gravity;
 var mapMap = {
   "Map 1":{url:"maps/map1.js", next:"Map 2"},
   "Map 2":{url:"maps/map2.js", next:"Map 3"},
@@ -46,12 +46,12 @@ function loadNextMap(){
 }
 
 function loadMap(mapName){
-  $('#next').hide();
   var url = mapMap[mapName].url;
   $.getScript(url, loadAttributes);
 }
 
 function loadAttributes(){
+  $('#next').hide();
   clearTimeout(gameLoop);
   xWidth = map[0].length;
   zWidth = map[0][0].length;
@@ -72,7 +72,8 @@ function loadAttributes(){
   spriteWidth = playerWidth*pixelsPerBlock;
   spriteHeight = (spriteWidth/realSprite.width)*realSprite.height;
   jumpSpeed = speed*0.25;
-  acceleration = speed*0.001*interval;
+  gravity = speed*0.0005*interval;
+  acceleration = movementSpeed/4;
   won = false;
   gameLoop = setInterval(gameLoopFunction, interval);
 }
@@ -145,8 +146,8 @@ function gameLoopFunction(){
     //If turning puts the player into a wall, move them 1/3 of the way
     //to the center of the block
     while (!canMoveHere(position.x, position.y, position.z)){
-      position.x -= (position.x-(Math.floor(position.x/speed)*speed+0.5*speed))/3;
-      position.z -= (position.z-(Math.floor(position.z/speed)*speed+0.5*speed))/3;
+      position.x -= (position.x-((Math.floor(position.x/speed)+0.5)*speed))/3;
+      position.z -= (position.z-((Math.floor(position.z/speed)+0.5)*speed))/3;
     }
   }
   else if (keyState[81]){
@@ -155,8 +156,8 @@ function gameLoopFunction(){
     //If turning puts the player into a wall, move them 1/3 of the way
     //to the center of the block
     while (!canMoveHere(position.x, position.y, position.z)){
-      position.x -= (position.x-(Math.floor(position.x/speed)*speed+0.5*speed))/3;
-      position.z -= (position.z-(Math.floor(position.z/speed)*speed+0.5*speed))/3;
+      position.x -= (position.x-((Math.floor(position.x/speed)+0.5)*speed))/3;
+      position.z -= (position.z-((Math.floor(position.z/speed)+0.5)*speed))/3;
     }
   }
   if (keyState[39] || keyState[68]){
@@ -191,7 +192,6 @@ function gameLoopFunction(){
       position.vel.y *= 1/2;
     }
   }
-
   drawCanvas();
 }
 
@@ -208,6 +208,7 @@ function canMoveHere(x, y, z){
   var points = [];
   var spriteBlockWidth = spriteWidth/pixelsPerBlock;
   var halfSpriteWidth = spriteBlockWidth/2;
+  points.push(new point(x, z));
   points.push(new point(x+(Math.cos(getRadians())*halfSpriteWidth), z+(Math.sin(getRadians())*halfSpriteWidth)));
   points.push(new point(x-(Math.cos(getRadians())*halfSpriteWidth), z-(Math.sin(getRadians())*halfSpriteWidth)));
   for (var pointIt = 0; pointIt < points.length; pointIt++){

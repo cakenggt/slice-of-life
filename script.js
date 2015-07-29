@@ -42,7 +42,6 @@ var imageData;
 function loadNextMap(){
   loadMap(mapMap[currentMap].next);
   currentMap = mapMap[currentMap].next;
-  drawCanvas();
 }
 
 function loadMap(mapName){
@@ -69,6 +68,7 @@ function loadAttributes(){
   acceleration = movementSpeed/4;
   won = false;
   gameLoop = setInterval(gameLoopFunction, interval);
+  drawCanvas();
 }
 
 //load all variables

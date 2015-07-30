@@ -392,37 +392,31 @@ function drawCanvas(){
   var padding = Math.floor((realCanvas.width-(indexColorLine.mapWidth*pixelsPerBlock))/2);
   //for each y level
   var yPos = realCanvas.height-Math.floor(pixelsPerBlock);
-  var t0 = getTime();
+  //Draw all of the air blocks at once
+  drawRectangle(tileMap[0].color, 0,
+    realCanvas.height-(map.length*Math.floor(pixelsPerBlock)),
+    realCanvas.width, Math.floor(pixelsPerBlock)*map.length);
   for (var y = 0; y < map.length; y++){
     //determine which direction to draw the rectangles with the direction attr
     var colorLine = getColorLine(y);
     var i = sliceAttributes.direction == 1 ? 0 : colorLine.recList.length-1;
-    //var i = 0;
-    //add air to the beginning
-    drawRectangle(tileMap[0].color, 0, yPos, padding, Math.floor(pixelsPerBlock));
     var lastStartPos = padding;
     while (i < colorLine.recList.length && i >= 0){
       var rectangle = colorLine.recList[i];
       var widthInPx = rectangle.width*pixelsPerBlock;
-      drawRectangle(rectangle.color, lastStartPos, yPos, widthInPx, Math.floor(pixelsPerBlock), false);
+      //if not air, draw rectangle
+      if (rectangle.color !== tileMap[0].color){
+        drawRectangle(rectangle.color, lastStartPos, yPos, widthInPx, Math.floor(pixelsPerBlock), false);
+      }
       var nextStartPos = lastStartPos+widthInPx;
       lastStartPos = nextStartPos;
       i = sliceAttributes.direction == 1 ? i+1 : i-1;
       //i++;
     }
-    //add air to the end too
-    drawRectangle(tileMap[0].color, lastStartPos, yPos, padding, Math.floor(pixelsPerBlock));
     yPos -= Math.floor(pixelsPerBlock);
   }
-  //console.log(getTime()-t0);
   //save the canvas image
-  //This takes around 30ms on map3
-  var t1 = getTime();
-  imageData = canvasContext.getImageData(0, 0, realCanvas.width, realCanvas.height);
-  var t2 = getTime();
-  drawSprite();
-  var t3 = getTime();
-  printTimes([t0, t1, t2, t3]);
+  //This takes around 7ms on map3
 }
 
 function drawSprite(){
@@ -446,11 +440,12 @@ function drawSprite(){
   canvasContext.stroke();
 }
 
-//Get time in milliseconds to 1/1000 resolution
+//Get time in milliseconds to 1/1000 resolution for debugging
 function getTime(){
   return performance.now();
 }
 
+//Print differences between each time in a list for debugging
 function printTimes(times){
   var str = '';
   for (var i = 1; i < times.length; i++){

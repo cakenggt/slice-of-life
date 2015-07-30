@@ -404,15 +404,16 @@ function drawCanvas(){
     var lastStartPos = padding;
     while (i < colorLine.recList.length && i >= 0){
       var rectangle = colorLine.recList[i];
-      var widthInPx = rectangle.width*Math.floor(pixelsPerBlock);
+      var widthInPx = rectangle.width*pixelsPerBlock;
       //if not air, draw rectangle
       if (rectangle.color !== tileMap[0].color){
-        drawRectangle(rectangle.color, lastStartPos, yPos, widthInPx, Math.floor(pixelsPerBlock), false);
+        //floor the start x and extend the width by the removed amount
+        //to prevent white lines between the tiles
+        drawRectangle(rectangle.color, Math.floor(lastStartPos), yPos, widthInPx+(lastStartPos%1), Math.floor(pixelsPerBlock), false);
       }
       var nextStartPos = lastStartPos+widthInPx;
       lastStartPos = nextStartPos;
       i = sliceAttributes.direction == 1 ? i+1 : i-1;
-      //i++;
     }
     yPos -= Math.floor(pixelsPerBlock);
   }

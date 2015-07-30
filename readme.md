@@ -8,4 +8,4 @@ Use troxel here: https://cakenggt.github.io/Troxel
 * Export as Link, then paste into troxelLink
 
 ![alt text](images/troxelExample.png "Logo Title Text 1")
-x and z 0, 0 is in the back right corner.
+x and z 0, 0 is the outlined block in the back right corner. x increases to the left, z increases to the right

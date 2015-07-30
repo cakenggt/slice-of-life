@@ -68,7 +68,6 @@ function loadAttributes(){
   acceleration = movementSpeed/4;
   won = false;
   gameLoop = setInterval(gameLoopFunction, interval);
-  drawCanvas();
 }
 
 //load all variables
@@ -353,7 +352,14 @@ function getColorLine(y){
       }
     }
     rectangle.color = map[y][Math.floor(offsetPoint.x)][Math.floor(offsetPoint.z)].color;
-    recList.push(rectangle);
+    if (recList.length > 0 && rectangle.color == recList[recList.length-1].color){
+      var prevRectangle = recList[recList.length-1];
+      prevRectangle.width += rectangle.width;
+      recList[recList.length-1] = prevRectangle;
+    }
+    else{
+      recList.push(rectangle);
+    }
   }
   result.recList = recList;
   return result;
@@ -386,6 +392,7 @@ function drawCanvas(){
   var padding = Math.floor((realCanvas.width-(indexColorLine.mapWidth*pixelsPerBlock))/2);
   //for each y level
   var yPos = realCanvas.height-Math.floor(pixelsPerBlock);
+  var t0 = getTime();
   for (var y = 0; y < map.length; y++){
     //determine which direction to draw the rectangles with the direction attr
     var colorLine = getColorLine(y);
@@ -398,7 +405,7 @@ function drawCanvas(){
       var rectangle = colorLine.recList[i];
       var widthInPx = rectangle.width*pixelsPerBlock;
       drawRectangle(rectangle.color, lastStartPos, yPos, widthInPx, Math.floor(pixelsPerBlock), false);
-      var nextStartPos = Math.floor(lastStartPos+widthInPx);
+      var nextStartPos = lastStartPos+widthInPx;
       lastStartPos = nextStartPos;
       i = sliceAttributes.direction == 1 ? i+1 : i-1;
       //i++;
@@ -407,9 +414,15 @@ function drawCanvas(){
     drawRectangle(tileMap[0].color, lastStartPos, yPos, padding, Math.floor(pixelsPerBlock));
     yPos -= Math.floor(pixelsPerBlock);
   }
+  //console.log(getTime()-t0);
   //save the canvas image
+  //This takes around 30ms on map3
+  var t1 = getTime();
   imageData = canvasContext.getImageData(0, 0, realCanvas.width, realCanvas.height);
+  var t2 = getTime();
   drawSprite();
+  var t3 = getTime();
+  printTimes([t0, t1, t2, t3]);
 }
 
 function drawSprite(){
@@ -431,4 +444,17 @@ function drawSprite(){
     Math.abs(Math.cos(getRadians())*ellipseHeight), ellipseHeight, 0, 0, 2*Math.PI);
   canvasContext.strokeStyle='green';
   canvasContext.stroke();
+}
+
+//Get time in milliseconds to 1/1000 resolution
+function getTime(){
+  return performance.now();
+}
+
+function printTimes(times){
+  var str = '';
+  for (var i = 1; i < times.length; i++){
+    str += (times[i]-times[i-1]) + ', ';
+  }
+  console.log(str.substring(0, str.length-2));
 }

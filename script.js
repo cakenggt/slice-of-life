@@ -139,7 +139,6 @@ function gameLoopFunction(){
       break;
     }
   }
-  drawSprite();
 
   //key controls
   var x;
@@ -198,6 +197,8 @@ function gameLoopFunction(){
       position.vel.y *= 1/2;
     }
   }
+
+  drawSprite();
 }
 
 /*

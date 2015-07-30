@@ -72,6 +72,7 @@ function loadAttributes(){
   acceleration = movementSpeed/4;
   won = false;
   gameLoop = setInterval(gameLoopFunction, interval);
+  drawCanvas();
 }
 
 //load all variables
@@ -82,7 +83,6 @@ $(function(){
   canvasContext = realCanvas.getContext('2d');
   loadAttributes();
 
-  drawCanvas();
   $(document).on('keydown', function(data){
     keyState[data.keyCode || data.which] = true;
     console.log(data.keyCode);

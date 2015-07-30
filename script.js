@@ -404,7 +404,7 @@ function drawCanvas(){
     var lastStartPos = padding;
     while (i < colorLine.recList.length && i >= 0){
       var rectangle = colorLine.recList[i];
-      var widthInPx = rectangle.width*pixelsPerBlock;
+      var widthInPx = rectangle.width*Math.floor(pixelsPerBlock);
       //if not air, draw rectangle
       if (rectangle.color !== tileMap[0].color){
         drawRectangle(rectangle.color, lastStartPos, yPos, widthInPx, Math.floor(pixelsPerBlock), false);

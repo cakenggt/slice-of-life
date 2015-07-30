@@ -58,11 +58,15 @@ function loadAttributes(){
   maxWidth = Math.sqrt(Math.pow(xWidth, 2) + Math.pow(zWidth, 2));
   pixelsPerBlock = realCanvas.width/maxWidth;
   movementSpeed = speed*0.004*interval;
-  realSprite = $('#sprite').get(0);
-  reverseSprite = $('#sprite-reverse').get(0);
-  //blocks multiplied by pixels to get pixels
-  spriteWidth = playerWidth*pixelsPerBlock;
-  spriteHeight = (spriteWidth/realSprite.width)*realSprite.height;
+  $('#sprite').load(function(){
+    realSprite = $(this).get(0);
+    //blocks multiplied by pixels to get pixels
+    spriteWidth = playerWidth*pixelsPerBlock;
+    spriteHeight = (spriteWidth/realSprite.width)*realSprite.height;
+  });
+  $('#sprite-reverse').load(function(){
+    reverseSprite = $(this).get(0);
+  });
   jumpSpeed = speed*0.25;
   gravity = speed*0.0005*interval;
   acceleration = movementSpeed/4;
@@ -77,10 +81,6 @@ $(function(){
   resizeCanvas();
   canvasContext = realCanvas.getContext('2d');
   loadAttributes();
-
-
-  //movement engine
-  gameLoop = setInterval(gameLoopFunction, interval);
 
   drawCanvas();
   $(document).on('keydown', function(data){
@@ -417,6 +417,7 @@ function drawCanvas(){
   }
   //save the canvas image
   //This takes around 7ms on map3
+  imageData = canvasContext.getImageData(0, 0, realCanvas.width, realCanvas.height);
 }
 
 function drawSprite(){

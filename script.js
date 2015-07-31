@@ -21,7 +21,8 @@ var reverseSprite;
 var spriteWidth;
 var spriteHeight;
 //one divided by this number
-var interval = 33;
+var interval;
+var lastLoopTime;
 //player jump given by map
 var speed;
 //in blocks, calculated from speed
@@ -39,7 +40,6 @@ var currentMap = "Map 1";
 var won = false;
 var spriteReversed = false;
 var climbableBlocks;
-var gameLoop;
 var totalLogTime = 0;
 var totalLogIt = 0;
 
@@ -55,13 +55,11 @@ function loadMap(mapName){
 
 function loadAttributes(){
   $('#next').hide();
-  clearTimeout(gameLoop);
   xWidth = map[0].length;
   zWidth = map[0][0].length;
   yWidth = map.length;
   maxWidth = Math.sqrt(Math.pow(xWidth, 2) + Math.pow(zWidth, 2));
   pixelsPerBlock = realCanvas.width/maxWidth;
-  movementSpeed = speed*0.004*interval;
   $('#sprite').load(function(){
     realSprite = $(this).get(0);
     //blocks multiplied by pixels to get pixels
@@ -71,11 +69,8 @@ function loadAttributes(){
   $('#sprite-reverse').load(function(){
     reverseSprite = $(this).get(0);
   });
-  jumpSpeed = speed*0.25;
-  gravity = speed*0.0005*interval;
-  acceleration = movementSpeed/4;
+  jumpSpeed = speed*0.18;
   won = false;
-  gameLoop = setInterval(gameLoopFunction, interval);
   drawCanvas();
 }
 
@@ -96,9 +91,21 @@ $(function(){
     keyState[data.keyCode || data.which] = false;
   });
   $('#next').on('click', loadNextMap);
+
+  lastLoopTime = getTime();
+  gameLoopFunction();
 });
 
-function gameLoopFunction(){
+function gameLoopFunction(timestamp){
+  interval = timestamp - lastLoopTime;
+  lastLoopTime = timestamp;
+
+  movementSpeed = speed*0.004*interval;
+  gravity = speed*0.0005*interval;
+  acceleration = movementSpeed/4;
+
+  requestAnimationFrame(gameLoopFunction);
+
   if (map[Math.floor(position.y)][Math.floor(position.x)][Math.floor(position.z)].goal){
     won = true;
   }
@@ -116,7 +123,13 @@ function gameLoopFunction(){
   position.vel.y = position.vel.y > -gravity*10 ? position.vel.y - gravity : position.vel.y;
   var newY = position.y+position.vel.y;
   if (canMoveHere(position.x, newY, position.z)){
-    position.y = newY;
+    if (canMoveHere(position.x, newY+(spriteHeight/pixelsPerBlock), position.z)){
+      position.y = newY;
+    }
+    else{
+      //cancel jump when you hit your head
+      position.vel.y = 0;
+    }
   }
   else{
     //cancel gravity when you cant move down
@@ -202,7 +215,6 @@ function gameLoopFunction(){
       position.vel.y *= 1/2;
     }
   }
-
   drawSprite();
 }
 
@@ -339,7 +351,8 @@ function getColorLine(y){
     var prevPoint = pointList[i-1];
     var rectangle = {};
     //get color to the left of the point, along the line
-    rectangle.width = currPoint.distance(prevPoint);
+    //rectangle width is in pixels, not blocks, and it is floored
+    rectangle.width = Math.floor(currPoint.distance(prevPoint)*pixelsPerBlock);
     var offsetPoint;
     if (Math.abs(sliceAttributes.line.slope) < 0.35) {
       if (sliceAttributes.line.slope < 0){
@@ -412,12 +425,12 @@ function drawCanvas(){
     var lastStartPos = padding;
     while (i < colorLine.recList.length && i >= 0){
       var rectangle = colorLine.recList[i];
-      var widthInPx = rectangle.width*pixelsPerBlock;
+      var widthInPx = rectangle.width;
       //if not air, draw rectangle
       if (rectangle.color !== tileMap[0].color){
         //floor the start x and extend the width by the removed amount
         //to prevent white lines between the tiles
-        drawRectangle(rectangle.color, Math.floor(lastStartPos), yPos, widthInPx+(lastStartPos%1), Math.floor(pixelsPerBlock), false);
+        drawRectangle(rectangle.color, lastStartPos, yPos, rectangle.width, Math.floor(pixelsPerBlock), false);
       }
       var nextStartPos = lastStartPos+widthInPx;
       lastStartPos = nextStartPos;

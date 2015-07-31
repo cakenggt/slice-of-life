@@ -2,15 +2,18 @@ function mod(n, m) {
   return ((n%m)+m)%m;
 }
 
-var canvas;
 var xWidth;
 var zWidth;
 var yWidth;
 var maxWidth;
 var pixelsPerBlock;
 var playerWidth;
+//this canvas is drawn on and hidden
 var realCanvas;
 var canvasContext;
+//This canvas is displayed
+var displayedCanvas;
+var displayedCanvasContext;
 var keyState = {};
 var realSprite;
 var reverseSprite;
@@ -37,7 +40,6 @@ var won = false;
 var spriteReversed = false;
 var climbableBlocks;
 var gameLoop;
-var imageData;
 
 function loadNextMap(){
   loadMap(mapMap[currentMap].next);
@@ -77,10 +79,11 @@ function loadAttributes(){
 
 //load all variables
 $(function(){
-  canvas = $('canvas');
-  realCanvas = canvas.get(0);
+  displayedCanvas = $('canvas').get(0);
+  realCanvas = document.createElement('canvas');
   resizeCanvas();
   canvasContext = realCanvas.getContext('2d');
+  displayedCanvasContext = displayedCanvas.getContext('2d');
   loadAttributes();
 
   $(document).on('keydown', function(data){
@@ -381,10 +384,13 @@ function resizeCanvas(){
     window.innerHeight : window.innerWidth;
   realCanvas.width = newSize/2;
   realCanvas.height = newSize/2;
+  displayedCanvas.width = newSize/2;
+  displayedCanvas.height = newSize/2;
   pixelsPerBlock = realCanvas.width/maxWidth;
 }
 
 function drawCanvas(){
+  var t0 = getTime();
   //clear canvas
   canvasContext.clearRect(0, 0, realCanvas.width, realCanvas.height);
   resizeCanvas();
@@ -417,30 +423,28 @@ function drawCanvas(){
     }
     yPos -= Math.floor(pixelsPerBlock);
   }
-  //save the canvas image
-  //This takes around 7ms on map3
-  imageData = canvasContext.getImageData(0, 0, realCanvas.width, realCanvas.height);
+  printTimes([t0, getTime()]);
 }
 
 function drawSprite(){
   //restore the canvas image
-  canvasContext.putImageData(imageData, 0, 0);
+  loadCanvas();
   var indexColorLine = getColorLine(0);
   var padding = Math.floor((realCanvas.width-(indexColorLine.mapWidth*pixelsPerBlock))/2);
   //calculate player's position
   var playerX = padding + indexColorLine.playerDeepness*Math.floor(pixelsPerBlock) - (spriteWidth/2);
   var playerY = realCanvas.height - position.y*Math.floor(pixelsPerBlock) - spriteHeight;
-  canvasContext.drawImage(spriteReversed ? reverseSprite : realSprite, playerX,
+  displayedCanvasContext.drawImage(spriteReversed ? reverseSprite : realSprite, playerX,
     playerY, spriteWidth, spriteHeight);
   //draw ellipse
   var ellipseHeight = spriteWidth*0.1;
-  canvasContext.beginPath();
+  displayedCanvasContext.beginPath();
   var ellipseX = spriteReversed ? playerX+(0.25*spriteWidth) :
     playerX+(0.75*spriteWidth);
-  canvasContext.ellipse(ellipseX, playerY+(0.3*spriteHeight),
+  displayedCanvasContext.ellipse(ellipseX, playerY+(0.3*spriteHeight),
     Math.abs(Math.cos(getRadians())*ellipseHeight), ellipseHeight, 0, 0, 2*Math.PI);
-  canvasContext.strokeStyle='green';
-  canvasContext.stroke();
+  displayedCanvasContext.strokeStyle='green';
+  displayedCanvasContext.stroke();
 }
 
 //Get time in milliseconds to 1/1000 resolution for debugging
@@ -455,4 +459,8 @@ function printTimes(times){
     str += (times[i]-times[i-1]) + ', ';
   }
   console.log(str.substring(0, str.length-2));
+}
+
+function loadCanvas(){
+  displayedCanvasContext.drawImage(realCanvas, 0, 0);
 }

@@ -166,7 +166,7 @@ function gameLoopFunction(timestamp){
     position.deg = mod(position.deg - 1.001,360);
     //If turning puts the player into a wall, move them 1/3 of the way
     //to the center of the block
-    while (!canMoveHere(position.x, position.y, position.z)){
+    if (!canMoveHere(position.x, position.y, position.z)){
       position.x -= (position.x-((Math.floor(position.x/speed)+0.5)*speed))/3;
       position.z -= (position.z-((Math.floor(position.z/speed)+0.5)*speed))/3;
     }
@@ -177,7 +177,7 @@ function gameLoopFunction(timestamp){
     position.deg = mod(position.deg + 1.001,360);
     //If turning puts the player into a wall, move them 1/3 of the way
     //to the center of the block
-    while (!canMoveHere(position.x, position.y, position.z)){
+    if (!canMoveHere(position.x, position.y, position.z)){
       position.x -= (position.x-((Math.floor(position.x/speed)+0.5)*speed))/3;
       position.z -= (position.z-((Math.floor(position.z/speed)+0.5)*speed))/3;
     }

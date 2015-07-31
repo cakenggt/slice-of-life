@@ -40,6 +40,8 @@ var won = false;
 var spriteReversed = false;
 var climbableBlocks;
 var gameLoop;
+var totalLogTime = 0;
+var totalLogIt = 0;
 
 function loadNextMap(){
   loadMap(mapMap[currentMap].next);
@@ -423,7 +425,7 @@ function drawCanvas(){
     }
     yPos -= Math.floor(pixelsPerBlock);
   }
-  printTimes([t0, getTime()]);
+  logTime(getTime()-t0);
 }
 
 function drawSprite(){
@@ -459,6 +461,17 @@ function printTimes(times){
     str += (times[i]-times[i-1]) + ', ';
   }
   console.log(str.substring(0, str.length-2));
+}
+
+function logTime(time){
+  totalLogTime += time;
+  totalLogIt ++;
+  console.log(totalLogTime/totalLogIt);
+}
+
+function resetLogTime(){
+  totalLogTime = 0;
+  totalLogIt = 0;
 }
 
 function loadCanvas(){

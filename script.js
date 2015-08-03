@@ -60,12 +60,19 @@ function loadAttributes(){
   yWidth = map.length;
   maxWidth = Math.sqrt(Math.pow(xWidth, 2) + Math.pow(zWidth, 2));
   pixelsPerBlock = realCanvas.width/maxWidth;
-  $('#sprite').load(function(){
-    realSprite = $(this).get(0);
-    //blocks multiplied by pixels to get pixels
-    spriteWidth = playerWidth*pixelsPerBlock;
+  //blocks multiplied by pixels to get pixels
+  spriteWidth = playerWidth*pixelsPerBlock;
+  if (!realSprite){
+    $('#sprite').load(function(){
+      realSprite = $(this).get(0);
+      //blocks multiplied by pixels to get pixels
+      spriteHeight = (spriteWidth/realSprite.width)*realSprite.height;
+    });
+  }
+  else{
+    //get new sprite height even if the realSprite has been loaded
     spriteHeight = (spriteWidth/realSprite.width)*realSprite.height;
-  });
+  }
   $('#sprite-reverse').load(function(){
     reverseSprite = $(this).get(0);
   });
@@ -91,6 +98,9 @@ $(function(){
     keyState[data.keyCode || data.which] = false;
   });
   $('#next').on('click', loadNextMap);
+  $(window).on('resize', function(){
+    loadAttributes();
+  });
 
   lastLoopTime = getTime();
   gameLoopFunction();

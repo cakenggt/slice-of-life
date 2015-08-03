@@ -266,6 +266,9 @@ function point(x, z){
   this.distance = function(other){
     return Math.sqrt(Math.pow(other.x-x, 2) + Math.pow(other.z-z, 2));
   };
+  this.equals = function(other){
+    return this.x === other.x && this.z === other.z;
+  };
 }
 
 //line object
@@ -383,23 +386,28 @@ function getColorLine(y){
       leftPoint = sliceAttributes.line.getPointGivenX(newX);
     }
   }
+  pointList.push(leftPoint);
+  pointList.push(rightPoint);
   //get all of the intercept points on the line
   for (var x = 0; x <= xWidth; x++){
     intercept = sliceAttributes.line.getPointGivenX(x);
     if (leftPoint.z < rightPoint.z){
-      if (intercept.z >= leftPoint.z && intercept.z <= rightPoint.z){
+      if (intercept.z >= leftPoint.z && intercept.z <= rightPoint.z &&
+        !intercept.equals(leftPoint) && !intercept.equals(rightPoint)){
         pointList.push(intercept);
       }
     }
     else{
-      if (intercept.z >= rightPoint.z && intercept.z <= leftPoint.z){
+      if (intercept.z >= rightPoint.z && intercept.z <= leftPoint.z &&
+        !intercept.equals(leftPoint) && !intercept.equals(rightPoint)){
         pointList.push(intercept);
       }
     }
   }
   for (var z = 0; z <= zWidth; z++){
     intercept = sliceAttributes.line.getPointGivenZ(z);
-    if (intercept.x >= leftPoint.x && intercept.x <= rightPoint.x){
+    if (intercept.x >= leftPoint.x && intercept.x <= rightPoint.x &&
+      !intercept.equals(leftPoint) && !intercept.equals(rightPoint)){
       pointList.push(intercept);
     }
   }

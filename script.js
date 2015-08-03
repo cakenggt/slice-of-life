@@ -352,14 +352,14 @@ function getColorLine(y){
   //This is how deep the player is into the map
   var rawDeepness = new point(position.x, position.z).distance(startPoint);
   //This is how deep the player is into the displayed map, in blocks
-  if (result.truncated && rawDeepness > result.mapWidth/2){
-    if (rawDeepness > mapWidth-(result.mapWidth/2)){
+  if (result.truncated && rawDeepness > maxWidth/2){
+    if (rawDeepness > mapWidth-(maxWidth/2)){
       //If the frame hits up against the right side of the map
-      result.playerDeepness = mapWidth-(result.mapWidth/2);
+      result.playerDeepness = rawDeepness-(mapWidth-(maxWidth));
     }
     else{
       //place in center of map
-      result.playerDeepness = result.mapWidth/2;
+      result.playerDeepness = maxWidth/2;
     }
   }
   else{
@@ -375,16 +375,14 @@ function getColorLine(y){
     var slopeVector = sliceAttributes.line.toVector();
     //normalize the vector
     slopeVector.normalize();
-    if (rawDeepness < mapWidth-(maxWidth/2)){
-      //right point changes
-      newX = position.x+(slopeVector.x*(maxWidth/2));
-      rightPoint = sliceAttributes.line.getPointGivenX(newX);
-    }
-    if (rawDeepness > (maxWidth/2)){
-      //left point changes
-      newX = position.x-(slopeVector.x*(maxWidth/2));
-      leftPoint = sliceAttributes.line.getPointGivenX(newX);
-    }
+    //right point changes
+    newX = position.x+(slopeVector.x*(maxWidth/2));
+    var newRightPoint = sliceAttributes.line.getPointGivenX(newX);
+    rightPoint = newRightPoint.z > zWidth ? sliceAttributes.line.getPointGivenZ(zWidth) : newRightPoint;
+    //left point changes
+    newX = position.x-(slopeVector.x*(maxWidth/2));
+    var newLeftPoint = sliceAttributes.line.getPointGivenX(newX);
+    leftPoint = newLeftPoint.z > 0 ? newLeftPoint : sliceAttributes.line.getPointGivenZ(0);
   }
   pointList.push(leftPoint);
   pointList.push(rightPoint);
@@ -443,7 +441,22 @@ function getColorLine(y){
         offsetPoint = sliceAttributes.line.getPointGivenZ(currPoint.z-0.000001);
       }
     }
-    rectangle.color = map[y][Math.floor(offsetPoint.x)][Math.floor(offsetPoint.z)].color;
+    try{
+      rectangle.color = map[y][Math.floor(offsetPoint.x)][Math.floor(offsetPoint.z)].color;
+    }
+    catch(err){
+      console.log(y + ', ' + x + ', ' + z);
+      console.log('currPoint');
+      console.log(currPoint);
+      console.log('offsetPoint');
+      console.log(offsetPoint);
+      console.log('sliceAttributes');
+      console.log(sliceAttributes);
+      console.log('pointList');
+      console.log(pointList);
+      console.log('result');
+      console.log(result);
+    }
     if (recList.length > 0 && rectangle.color == recList[recList.length-1].color){
       var prevRectangle = recList[recList.length-1];
       prevRectangle.width += rectangle.width;

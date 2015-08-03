@@ -393,21 +393,26 @@ function getColorLine(y){
     intercept = sliceAttributes.line.getPointGivenX(x);
     if (leftPoint.z < rightPoint.z){
       if (intercept.z >= leftPoint.z && intercept.z <= rightPoint.z &&
-        !intercept.equals(leftPoint) && !intercept.equals(rightPoint)){
+        !intercept.equals(leftPoint) && !intercept.equals(rightPoint) &&
+        x >= leftPoint.x && x <= rightPoint.x){
         pointList.push(intercept);
       }
     }
     else{
       if (intercept.z >= rightPoint.z && intercept.z <= leftPoint.z &&
-        !intercept.equals(leftPoint) && !intercept.equals(rightPoint)){
+        !intercept.equals(leftPoint) && !intercept.equals(rightPoint) &&
+        x >= leftPoint.x && x <= rightPoint.x){
         pointList.push(intercept);
       }
     }
   }
+  var topPoint = leftPoint.z > rightPoint.z ? leftPoint : rightPoint;
+  var bottomPoint = leftPoint.z > rightPoint.z ? rightPoint : leftPoint;
   for (var z = 0; z <= zWidth; z++){
     intercept = sliceAttributes.line.getPointGivenZ(z);
     if (intercept.x >= leftPoint.x && intercept.x <= rightPoint.x &&
-      !intercept.equals(leftPoint) && !intercept.equals(rightPoint)){
+      !intercept.equals(leftPoint) && !intercept.equals(rightPoint) &&
+      z >= bottomPoint.z && z <= topPoint.z){
       pointList.push(intercept);
     }
   }

@@ -62,17 +62,11 @@ function loadAttributes(){
   pixelsPerBlock = realCanvas.width/maxWidth;
   //blocks multiplied by pixels to get pixels
   spriteWidth = playerWidth*pixelsPerBlock;
-  if (!realSprite){
-    $('#sprite').load(function(){
-      realSprite = $(this).get(0);
-      //blocks multiplied by pixels to get pixels
-      spriteHeight = (spriteWidth/realSprite.width)*realSprite.height;
-    });
-  }
-  else{
-    //get new sprite height even if the realSprite has been loaded
+  $('#sprite').load(function(){
+    realSprite = $(this).get(0);
+    //blocks multiplied by pixels to get pixels
     spriteHeight = (spriteWidth/realSprite.width)*realSprite.height;
-  }
+  });
   $('#sprite-reverse').load(function(){
     reverseSprite = $(this).get(0);
   });
@@ -99,7 +93,8 @@ $(function(){
   });
   $('#next').on('click', loadNextMap);
   $(window).on('resize', function(){
-    loadAttributes();
+    resizeCanvas();
+    drawCanvas();
   });
 
   lastLoopTime = getTime();
@@ -411,6 +406,13 @@ function resizeCanvas(){
   displayedCanvas.width = newSize/2;
   displayedCanvas.height = newSize/2;
   pixelsPerBlock = realCanvas.width/maxWidth;
+  //if realSprite has been loaded, recalculate spriteWidth and spriteHeight
+  //this will not fire the first time resizeCanvas is run, since it is
+  //before loadAttributes
+  if (realSprite){
+    spriteWidth = playerWidth*pixelsPerBlock;
+    spriteHeight = (spriteWidth/realSprite.width)*realSprite.height;
+  }
 }
 
 function drawCanvas(){

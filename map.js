@@ -11,6 +11,12 @@ function vector(x, y, z){
   this.length = function(){
     return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
   };
+  this.normalize = function(){
+    var length = this.length();
+    this.x = this.x/length;
+    this.y = this.y/length;
+    this.z = this.z/length;
+  };
 }
 
 /*

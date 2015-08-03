@@ -42,6 +42,10 @@ var spriteReversed = false;
 var climbableBlocks;
 var totalLogTime = 0;
 var totalLogIt = 0;
+//The absolute maximum width, length, and height displayed, in scales
+var absolute = 10;
+//The y level that the drawing starts on
+var startY;
 
 function loadNextMap(){
   loadMap(mapMap[currentMap].next);
@@ -58,7 +62,10 @@ function loadAttributes(){
   xWidth = map[0].length;
   zWidth = map[0][0].length;
   yWidth = map.length;
-  maxWidth = Math.sqrt(Math.pow(xWidth, 2) + Math.pow(zWidth, 2));
+  var mapMaxWidth = Math.sqrt(Math.pow(xWidth, 2) + Math.pow(zWidth, 2));
+  var absoluteMaxWidth = Math.sqrt(Math.pow(absolute*scale, 2)*2);
+  //Set the maxWidth to whichever is smaller
+  maxWidth = absoluteMaxWidth < mapMaxWidth ? absoluteMaxWidth : mapMaxWidth;
   pixelsPerBlock = realCanvas.width/maxWidth;
   //blocks multiplied by pixels to get pixels
   spriteWidth = playerWidth*pixelsPerBlock;
@@ -175,7 +182,7 @@ function gameLoopFunction(timestamp){
       position.x -= (position.x-((Math.floor(position.x/scale)+0.5)*scale))/3;
       position.z -= (position.z-((Math.floor(position.z/scale)+0.5)*scale))/3;
     }
-    drawCanvas();
+    //drawCanvas();
   }
   else if (keyState[81]){
     //rotate clockwise
@@ -186,7 +193,7 @@ function gameLoopFunction(timestamp){
       position.x -= (position.x-((Math.floor(position.x/scale)+0.5)*scale))/3;
       position.z -= (position.z-((Math.floor(position.z/scale)+0.5)*scale))/3;
     }
-    drawCanvas();
+    //drawCanvas();
   }
   if (keyState[39] || keyState[68]){
     //go right
@@ -220,6 +227,7 @@ function gameLoopFunction(timestamp){
       position.vel.y *= 1/2;
     }
   }
+  drawCanvas();
   drawSprite();
 }
 
@@ -272,6 +280,10 @@ function line(slope, zOffset){
     //Gets the point on this line at a certain z value
     return new point((z-zOffset)/slope, z);
   };
+  this.toVector = function(){
+    //returns the slope as a vector
+    return new vector(1, 0, slope);
+  };
 }
 
 //Returns the degrees in the global position variable in radians
@@ -318,32 +330,76 @@ function getColorLine(y){
       boundPointList.splice(r, 1);
     }
   }
+  //point with lowest x
   var leftPoint = boundPointList.sort(function(a, b){
     return a.x-b.x;
   })[0];
+  //point with highest x
   var rightPoint = boundPointList.sort(function(a, b){
     return b.x-a.x;
   })[0];
   var startPoint = sliceAttributes.direction == 1 ? leftPoint : rightPoint;
   var endPoint = sliceAttributes.direction == 1 ? rightPoint : leftPoint;
   var mapWidth = endPoint.distance(startPoint);
+  //whether the map will be truncated horizontally
+  result.truncated = maxWidth < mapWidth;
   //This is the width of the map, which will sometimes have air on either side
-  result.mapWidth = mapWidth;
+  //This will be truncated to maxWidth if it is larger
+  result.mapWidth = result.truncated ? maxWidth : mapWidth;
   //This is how deep the player is into the map
-  result.playerDeepness = new point(position.x, position.z).distance(startPoint);
+  var rawDeepness = new point(position.x, position.z).distance(startPoint);
+  //This is how deep the player is into the displayed map, in blocks
+  if (result.truncated && rawDeepness > result.mapWidth/2){
+    if (rawDeepness > mapWidth-(result.mapWidth/2)){
+      //If the frame hits up against the right side of the map
+      result.playerDeepness = mapWidth-(result.mapWidth/2);
+    }
+    else{
+      //place in center of map
+      result.playerDeepness = result.mapWidth/2;
+    }
+  }
+  else{
+    result.playerDeepness = rawDeepness;
+  }
   var recList = [];
   var pointList = [];
   var intercept = null;
+  var newX;
+  if (result.truncated){
+    //Set left and right points to the truncated points
+    //accounts for the screen following the player
+    var slopeVector = sliceAttributes.line.toVector();
+    //normalize the vector
+    slopeVector.normalize();
+    if (rawDeepness < mapWidth-(maxWidth/2)){
+      //right point changes
+      newX = position.x+(slopeVector.x*(maxWidth/2));
+      rightPoint = sliceAttributes.line.getPointGivenX(newX);
+    }
+    if (rawDeepness > (maxWidth/2)){
+      //left point changes
+      newX = position.x-(slopeVector.x*(maxWidth/2));
+      leftPoint = sliceAttributes.line.getPointGivenX(newX);
+    }
+  }
   //get all of the intercept points on the line
   for (var x = 0; x <= xWidth; x++){
     intercept = sliceAttributes.line.getPointGivenX(x);
-    if (intercept.z > 0 && intercept.z <= zWidth){
-      pointList.push(intercept);
+    if (leftPoint.z < rightPoint.z){
+      if (intercept.z >= leftPoint.z && intercept.z <= rightPoint.z){
+        pointList.push(intercept);
+      }
+    }
+    else{
+      if (intercept.z >= rightPoint.z && intercept.z <= leftPoint.z){
+        pointList.push(intercept);
+      }
     }
   }
   for (var z = 0; z <= zWidth; z++){
     intercept = sliceAttributes.line.getPointGivenZ(z);
-    if (intercept.x > 0 && intercept.x <= xWidth){
+    if (intercept.x >= leftPoint.x && intercept.x <= rightPoint.x){
       pointList.push(intercept);
     }
   }
@@ -429,7 +485,10 @@ function drawCanvas(){
   drawRectangle(tileMap[0].color, 0,
     realCanvas.height-(map.length*Math.floor(pixelsPerBlock)),
     realCanvas.width, Math.floor(pixelsPerBlock)*map.length);
-  for (var y = 0; y < map.length; y++){
+  //TODO write the y following code so that it uses fractions
+  startY = indexColorLine.truncated && position.y > (maxWidth/2) ?
+    Math.floor(position.y-(maxWidth/2)) : 0;
+  for (var y = startY; y < map.length; y++){
     //determine which direction to draw the rectangles with the direction attr
     var colorLine = getColorLine(y);
     var i = sliceAttributes.direction == 1 ? 0 : colorLine.recList.length-1;
@@ -449,7 +508,7 @@ function drawCanvas(){
     }
     yPos -= Math.floor(pixelsPerBlock);
   }
-  logTime(getTime()-t0);
+  //logTime(getTime()-t0);
 }
 
 function drawSprite(){
@@ -459,7 +518,7 @@ function drawSprite(){
   var padding = Math.floor((realCanvas.width-(indexColorLine.mapWidth*pixelsPerBlock))/2);
   //calculate player's position
   var playerX = padding + indexColorLine.playerDeepness*Math.floor(pixelsPerBlock) - (spriteWidth/2);
-  var playerY = realCanvas.height - position.y*Math.floor(pixelsPerBlock) - spriteHeight;
+  var playerY = realCanvas.height - (position.y-startY)*Math.floor(pixelsPerBlock) - spriteHeight;
   displayedCanvasContext.drawImage(spriteReversed ? reverseSprite : realSprite, playerX,
     playerY, spriteWidth, spriteHeight);
   //draw ellipse

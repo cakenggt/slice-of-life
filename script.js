@@ -24,10 +24,10 @@ var spriteHeight;
 var interval;
 var lastLoopTime;
 //player jump given by map
-var speed;
-//in blocks, calculated from speed
+var scale;
+//in blocks, calculated from scale
 var jumpSpeed;
-//calculated from speed
+//calculated from scale
 var movementSpeed;
 var acceleration;
 var gravity;
@@ -76,7 +76,7 @@ function loadAttributes(){
   $('#sprite-reverse').load(function(){
     reverseSprite = $(this).get(0);
   });
-  jumpSpeed = speed*0.18;
+  jumpSpeed = scale*0.18;
   won = false;
   drawCanvas();
 }
@@ -110,8 +110,8 @@ function gameLoopFunction(timestamp){
   interval = timestamp - lastLoopTime;
   lastLoopTime = timestamp;
 
-  movementSpeed = speed*0.004*interval;
-  gravity = speed*0.0005*interval;
+  movementSpeed = scale*0.004*interval;
+  gravity = scale*0.0005*interval;
   acceleration = movementSpeed/4;
 
   requestAnimationFrame(gameLoopFunction);
@@ -177,8 +177,8 @@ function gameLoopFunction(timestamp){
     //If turning puts the player into a wall, move them 1/3 of the way
     //to the center of the block
     if (!canMoveHere(position.x, position.y, position.z)){
-      position.x -= (position.x-((Math.floor(position.x/speed)+0.5)*speed))/3;
-      position.z -= (position.z-((Math.floor(position.z/speed)+0.5)*speed))/3;
+      position.x -= (position.x-((Math.floor(position.x/scale)+0.5)*scale))/3;
+      position.z -= (position.z-((Math.floor(position.z/scale)+0.5)*scale))/3;
     }
     drawCanvas();
   }
@@ -188,8 +188,8 @@ function gameLoopFunction(timestamp){
     //If turning puts the player into a wall, move them 1/3 of the way
     //to the center of the block
     if (!canMoveHere(position.x, position.y, position.z)){
-      position.x -= (position.x-((Math.floor(position.x/speed)+0.5)*speed))/3;
-      position.z -= (position.z-((Math.floor(position.z/speed)+0.5)*speed))/3;
+      position.x -= (position.x-((Math.floor(position.x/scale)+0.5)*scale))/3;
+      position.z -= (position.z-((Math.floor(position.z/scale)+0.5)*scale))/3;
     }
     drawCanvas();
   }

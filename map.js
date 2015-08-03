@@ -92,7 +92,7 @@ function setGameVarForMap(givenMap){
   position = givenMap.playerPos;
   map = givenMap.tiles;
   playerWidth = givenMap.playerWidth;
-  speed = givenMap.speed;
+  scale = givenMap.scale;
   climbableBlocks = givenMap.climbableBlocks;
 }
 

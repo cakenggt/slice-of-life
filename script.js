@@ -34,7 +34,8 @@ var gravity;
 var mapMap = {
   "Map 1":{url:"maps/map1.js", next:"Map 2"},
   "Map 2":{url:"maps/map2.js", next:"Map 3"},
-  "Map 3":{url:"maps/map3.js"}
+  "Map 3":{url:"maps/map3.js", next:"Map 4"},
+  "Map 4":{url:"maps/map4.js"}
 };
 var currentMap = "Map 1";
 var won = false;

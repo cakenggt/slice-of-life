@@ -20,7 +20,7 @@ Wrap in a call to `setGameVarForMap`
 * playerWidth: width of the player (in blocks) (should be multiplied by scale)
 * scale: scale of the blocks (used for velocity and gravity calculations)
 * climbableBlocks: number of blocks that are auto-climbable
-* animation: function called once per frame to animate the map. Takes `DOMHighResTimeStamp` parameter
+* animation: function called once per frame to animate the map. Takes `DOMHighResTimeStamp` parameter. Can mutate `position` and `map` global variables
 * troxelLink: pasted troxel link for map
 
 Maps

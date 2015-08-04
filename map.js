@@ -94,6 +94,7 @@ function setGameVarForMap(givenMap){
   playerWidth = givenMap.playerWidth;
   scale = givenMap.scale;
   climbableBlocks = givenMap.climbableBlocks;
+  animation = givenMap.animation;
 }
 
 //Convert link to tile array

@@ -43,6 +43,8 @@ var spriteReversed = false;
 var climbableBlocks;
 var totalLogTime = 0;
 var totalLogIt = 0;
+var animation;
+var logging = false;
 
 function loadNextMap(){
   loadMap(mapMap[currentMap].next);
@@ -167,6 +169,7 @@ function gameLoopFunction(timestamp){
   //key controls
   var x;
   var z;
+  var redrawCanvas = false;
   if (keyState[69]){
     //rotate anticlockwise
     position.deg = mod(position.deg - 1.001,360);
@@ -176,7 +179,7 @@ function gameLoopFunction(timestamp){
       position.x -= (position.x-((Math.floor(position.x/scale)+0.5)*scale))/3;
       position.z -= (position.z-((Math.floor(position.z/scale)+0.5)*scale))/3;
     }
-    drawCanvas();
+    redrawCanvas = true;
   }
   else if (keyState[81]){
     //rotate clockwise
@@ -187,7 +190,7 @@ function gameLoopFunction(timestamp){
       position.x -= (position.x-((Math.floor(position.x/scale)+0.5)*scale))/3;
       position.z -= (position.z-((Math.floor(position.z/scale)+0.5)*scale))/3;
     }
-    drawCanvas();
+    redrawCanvas = true;
   }
   if (keyState[39] || keyState[68]){
     //go right
@@ -221,6 +224,18 @@ function gameLoopFunction(timestamp){
       position.vel.y *= 1/2;
     }
   }
+
+  //animation
+  if (animation){
+    animation(timestamp);
+    redrawCanvas = true;
+  }
+
+
+  if (redrawCanvas){
+    drawCanvas();
+  }
+
   drawSprite();
 }
 
@@ -450,7 +465,9 @@ function drawCanvas(){
     }
     yPos -= Math.floor(pixelsPerBlock);
   }
-  logTime(getTime()-t0);
+  if (logging){
+    logTime(getTime()-t0);
+  }
 }
 
 function drawSprite(){

@@ -288,6 +288,11 @@ function line(slope, zOffset){
     //Gets the point on this line at a certain z value
     return new point((z-zOffset)/slope, z);
   };
+  this.getPerpendicularAtPoint = function(point){
+    var newSlope = -1/this.slope;
+    var newOffset = point.z - (point.x*newSlope);
+    return new line(newSlope, newOffset);
+  };
 }
 
 //Returns the degrees in the global position variable in radians

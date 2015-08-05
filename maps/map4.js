@@ -16,14 +16,16 @@ setGameVarForMap({
     var blade = new tile('#5C5C5C', true, false);
     //we'll pretend that y is z for the purposes of the line, since z is constant
     var slope1 = Math.tan(((Math.floor(timestamp)%2000)/2000)*(Math.PI/2));
-    var line1 = new line(slope1, 8.5-(slope1*11.5));
+    var line1 = new line(slope1, 8.5-(slope1*5.5));
     //get the line perpendicular at the
-    var line2 = line1.getPerpendicularAtPoint(new point(11.5, 8.5));
+    var line2 = line1.getPerpendicularAtPoint(new point(5.5, 8.5));
     //clear the previous blades and draw new ones
     for (var z = 1; z < 10; z++){
       for (var y = 4; y < 13; y++){
         if (z == Math.floor(line1.getPointGivenZ(y).x) ||
-          z == Math.floor(line2.getPointGivenZ(y).x)){
+          z == Math.floor(line2.getPointGivenZ(y).x) ||
+          y == Math.floor(line1.getPointGivenX(z).z) ||
+          y == Math.floor(line2.getPointGivenX(z).z)){
           map[y][11][z] = blade;
         }
         else{

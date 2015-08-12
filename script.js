@@ -45,6 +45,7 @@ var totalLogTime = 0;
 var totalLogIt = 0;
 var animation;
 var logging = false;
+var autoTurnDeg = 0;
 
 function loadNextMap(){
   loadMap(mapMap[currentMap].next);
@@ -114,6 +115,19 @@ function gameLoopFunction(timestamp){
 
   requestAnimationFrame(gameLoopFunction);
 
+  //Auto-turn code
+  if (autoTurnDeg != position.deg){
+    if (position.deg > autoTurnDeg){
+      position.deg = mod(position.deg - 1,360);
+    }
+    else{
+      position.deg = mod(position.deg + 1,360);
+    }
+    drawCanvas();
+    drawSprite();
+    return;
+  }
+
   if (map[Math.floor(position.y)][Math.floor(position.x)][Math.floor(position.z)].goal){
     won = true;
   }
@@ -172,7 +186,8 @@ function gameLoopFunction(timestamp){
   var redrawCanvas = false;
   if (keyState[69]){
     //rotate anticlockwise
-    position.deg = mod(position.deg - 1.001,360);
+    position.deg = mod(position.deg - 1,360);
+    autoTurnDeg = position.deg;
     //If turning puts the player into a wall, move them 1/3 of the way
     //to the center of the block
     if (!canMoveHere(position.x, position.y, position.z)){
@@ -183,7 +198,8 @@ function gameLoopFunction(timestamp){
   }
   else if (keyState[81]){
     //rotate clockwise
-    position.deg = mod(position.deg + 1.001,360);
+    position.deg = mod(position.deg + 1,360);
+    autoTurnDeg = position.deg;
     //If turning puts the player into a wall, move them 1/3 of the way
     //to the center of the block
     if (!canMoveHere(position.x, position.y, position.z)){
@@ -378,6 +394,10 @@ function getColorLine(y){
     var rectangle = {};
     //get color to the left of the point, along the line
     rectangle.width = currPoint.distance(prevPoint);
+    //Don't draw any rectangles with widths too small
+    if (rectangle.width < 0.00000001){
+      continue;
+    }
     var offsetPoint;
     if (Math.abs(sliceAttributes.line.slope) < 0.35) {
       if (sliceAttributes.line.slope < 0){

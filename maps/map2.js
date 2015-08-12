@@ -1,8 +1,8 @@
 setGameVarForMap({
   playerPos:{
-  x: 0.50001,
+  x: 0.5,
   y: 2,
-  z: 0.50001,
+  z: 0.5,
   deg: 0,
   vel: new vector(0, 0, 0)
   },
